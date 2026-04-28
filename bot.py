@@ -7,8 +7,6 @@ import os
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
 
-#TOKEN = "8711716749:AAF8WPaqF7LSY_EjGNLnUQL01RhjCKaQY6g"
-
 def main():
     inicializar_db()
     app = ApplicationBuilder().token(TOKEN).build()
