@@ -1,0 +1,102 @@
+from database import obtener_gastos, obtener_deudas, registrar_usuario, registrar_gasto, saldar_deuda, obtener_deudas_usuario, obtener_id_por_username
+from database import obtener_total_gastado, obtener_total_deuda, obtener_total_a_cobrar, obtener_gastos_por_categoria
+from calculadora import calcular_deudas
+
+
+async def start(update, context):
+    """Registra al usuario en la base de datos si es su primera vez"""
+    if update.message.from_user.username is None:
+        await update.message.reply_text("Para poder registrate, debes tener un nombre de usuario de Telegram (@username)")
+        return
+
+    registrar_usuario(update.message.from_user.id, update.message.from_user.first_name, update.message.from_user.username)
+    await update.message.reply_text("Bienvenido! Tu usuario ha sido registrado")
+
+async def gasto(update, context):
+    """Recoje un gasto y crea las correspondientes deudas"""
+    gasto = context.args
+    id = update.message.from_user.id
+    if len(gasto) < 2:
+        await update.message.reply_text("Error al añadir tu gasto. Uso correcto: /gasto [cantidad] [descripción] [categoría opcional]")
+        return
+
+    if len(gasto) == 2:
+        registrar_gasto(id, float(gasto[0]), gasto[1])
+    else:
+        registrar_gasto(id, float(gasto[0]), gasto[1], gasto[2])
+
+    calcular_deudas(id, float(gasto[0]))
+
+    await update.message.reply_text(f"Tu gasto de {gasto[0]} en {gasto[1]} se ha registrado")
+
+async def deudas(update, context):
+    """Muestra todas las deudas del grupo"""
+
+    deudas = obtener_deudas()
+    mensaje = "Las deudas del grupo son:\n"
+    for elemento in deudas:
+        mensaje += f"{elemento[2]} le debe {elemento[5]}€ a {elemento[4]}\n"
+    await update.message.reply_text(mensaje)
+
+async def misdeudas(update, context):
+    """Muestra las deudas concretas del usuario"""
+
+    misdeudas = obtener_deudas_usuario(update.message.from_user.id)
+    mensaje = "Tus deudas son:\n"
+    for elemento in misdeudas:
+        mensaje += f"Le debes {elemento[5]}€ a {elemento[4]}\n"
+    await update.message.reply_text(mensaje)
+
+async def historial(update, context):
+    """Muestra un historial de los ultimos gastos del grupo"""
+
+    gastos = obtener_gastos()
+    mensaje = "Los últimos gastos son:\n"
+
+    for gasto in gastos[:10]:
+        mensaje += f"{gasto[1]} ha gastado {gasto[2]}€ en {gasto[3]} el día {gasto[5]}"
+    await update.message.reply_text(mensaje)    
+
+
+async def saldar(update, context):
+    """Salda una deuda de un usuario"""
+    
+    if len(context.args) < 1:
+        await update.message.reply_text("Error al saldar tu deuda. Uso correcto: /saldar [@usuario]")
+        return
+    
+    usuario = context.args[0]
+    
+    acreedor_id = obtener_id_por_username(usuario)
+
+    if acreedor_id is None:
+        await update.message.reply_text("No encontré ese usuario. Asegúrate de que esté registrado en el bot.")
+        return
+
+    saldar_deuda(update.message.from_user.id, acreedor_id[0])
+
+    await update.message.reply_text(f"{update.message.from_user.first_name} ha saldado su deuda con {usuario} ")
+
+
+async def resumen(update, context):
+    """Obtener un resumen del mes de un usuario"""
+
+    id = update.message.from_user.id
+    mensaje_categorias = ""
+
+    gasto_total = obtener_total_gastado(id)
+    deuda_total = obtener_total_deuda(id)
+    total_a_cobrar = obtener_total_a_cobrar(id)
+    gastos_categoria = obtener_gastos_por_categoria(id)
+
+    for gasto in gastos_categoria:
+        mensaje_categorias += f"Has gastado {gasto[0]}€ en {gasto[1]}\n"
+
+    await update.message.reply_text(f"""*{update.message.from_user.first_name}, aquí tienes tu resumen del mes:*
+
+Has tenido un gasto total de {gasto_total[0] or 0}€
+Tienes una deuda total de {deuda_total[0] or 0}€
+Te deben {total_a_cobrar[0] or 0}€
+
+*Tus gastos por categoría*
+{mensaje_categorias}""",  parse_mode='Markdown')
