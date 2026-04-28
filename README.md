@@ -2,6 +2,10 @@
 
 Bot de Telegram para gestionar gastos compartidos en un piso. Permite registrar gastos, calcular deudas automáticamente entre compañeros y obtener resúmenes mensuales por categoría.
 
+## 🤖 Pruébalo
+
+Busca **@gastospiso_bot** en Telegram y escribe `/start` para probarlo.
+
 ---
 
 ## ✨ Comandos
@@ -18,12 +22,38 @@ Bot de Telegram para gestionar gastos compartidos en un piso. Permite registrar 
 
 ---
 
+## 💡 Características
+
+- Registro automático de usuarios al hacer `/start`
+- Requiere username de Telegram para garantizar la identificación de cada usuario
+- Cálculo automático de deudas al registrar un gasto, dividido entre todos los miembros del grupo
+- Resumen mensual con total gastado, deudas pendientes y desglose por categoría
+- Historial de los últimos 10 gastos del grupo
+
+---
+
 ## 🛠️ Tecnologías
 
 - Python 3.12
 - python-telegram-bot 20.3
 - SQLite
 - Pandas
+
+---
+
+## 📁 Estructura del proyecto
+
+```
+gastosbot/
+├── bot.py              # Punto de entrada, inicializa y arranca el bot
+├── database.py         # Funciones de acceso a la base de datos SQLite
+├── handlers.py         # Handlers de cada comando de Telegram
+├── calculadora.py      # Lógica de cálculo y reparto de deudas
+├── requirements.txt    # Dependencias del proyecto
+├── Dockerfile          # Configuración para despliegue con Docker
+├── fly.toml            # Configuración de despliegue en Fly.io
+└── README.md
+```
 
 ---
 
@@ -48,28 +78,4 @@ TOKEN=tu_token_aquí
 
 ```bash
 python bot.py
-```
-
----
-
-## 💡 Características
-
-- Registro automático de usuarios al hacer `/start`
-- Requiere username de Telegram para garantizar la identificación de cada usuario
-- Cálculo automático de deudas al registrar un gasto, dividido entre todos los miembros del grupo
-- Resumen mensual con total gastado, deudas pendientes y desglose por categoría
-- Historial de los últimos 10 gastos del grupo
-
----
-
-## 📁 Estructura del proyecto
-
-```
-gastosbot/
-├── bot.py              # Punto de entrada, inicializa y arranca el bot
-├── database.py         # Funciones de acceso a la base de datos SQLite
-├── handlers.py         # Handlers de cada comando de Telegram
-├── calculadora.py      # Lógica de cálculo y reparto de deudas
-├── requirements.txt    # Dependencias del proyecto
-└── README.md
 ```
