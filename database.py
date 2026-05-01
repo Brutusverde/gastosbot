@@ -40,6 +40,25 @@ def inicializar_db():
             FOREIGN KEY (acreedor_id) REFERENCES usuarios(id)
         )
         ''')
+
+        cursor.execute('''               
+        CREATE TABLE IF NOT EXISTS grupos(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT NOT NULL,
+            codigo_invitacion TEXT NOT NULL,
+            telegram_chat_id TEXT NOT NULL
+        )
+        ''')
+
+        cursor.execute('''               
+        CREATE TABLE IF NOT EXISTS user_groups(
+            user_id INTEGER NOT NULL,
+            group_id INTEGER NOT NULL,
+            es_admin INTEGER DEFAULT 0,
+            FOREIGN KEY (user_id) REFERENCES usuarios(id),
+            FOREIGN KEY (group_id) REFERENCES grupos(id)
+        )
+        ''')
         conn.commit()
 
 def registrar_usuario(id, nombre, username):
