@@ -80,6 +80,8 @@ TOKEN=tu_token_aquí
 python bot.py
 ```
 
+---
+
 ## 🗺️ Roadmap
 
 ### ✅ Completado
