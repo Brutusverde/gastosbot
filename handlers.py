@@ -121,9 +121,15 @@ async def handler_crear_grupo(update, context):
         return
     
     nombre_grupo = " ".join(context.args)
-    codigo = crear_codigo()
+    
     user_id = update.message.from_user.id
     chat_id = update.message.chat_id
+
+    if obtener_grupo(chat_id) is not None:
+        await update.message.reply_text(f"Error al crear tu grupo. Ya existe un grupo en este chat")
+        return
+    
+    codigo = crear_codigo()
 
     crear_grupo(nombre_grupo, codigo, chat_id)
     grupo = obtener_grupo(chat_id)
