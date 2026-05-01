@@ -14,20 +14,20 @@ async def start(update, context):
 
 async def gasto(update, context):
     """Recoje un gasto y crea las correspondientes deudas"""
-    gasto = context.args
+    gasto_usuario = context.args
     id = update.message.from_user.id
-    if len(gasto) < 2:
+    if len(gasto_usuario) < 2:
         await update.message.reply_text("Error al añadir tu gasto. Uso correcto: /gasto [cantidad] [descripción] [categoría opcional]")
         return
 
-    if len(gasto) == 2:
-        registrar_gasto(id, float(gasto[0]), gasto[1])
+    if len(gasto_usuario) == 2:
+        registrar_gasto(id, float(gasto_usuario[0]), gasto_usuario[1])
     else:
-        registrar_gasto(id, float(gasto[0]), gasto[1], gasto[2])
+        registrar_gasto(id, float(gasto_usuario[0]), gasto_usuario[1], gasto_usuario[2])
 
-    calcular_deudas(id, float(gasto[0]))
+    calcular_deudas(id, float(gasto_usuario[0]))
 
-    await update.message.reply_text(f"Tu gasto de {gasto[0]} en {gasto[1]} se ha registrado")
+    await update.message.reply_text(f"Tu gasto de {gasto_usuario[0]} en {gasto_usuario[1]} se ha registrado")
 
 async def deudas(update, context):
     """Muestra todas las deudas del grupo"""
@@ -54,7 +54,7 @@ async def historial(update, context):
     mensaje = "Los últimos gastos son:\n"
 
     for gasto in gastos[:10]:
-        mensaje += f"{gasto[1]} ha gastado {gasto[2]}€ en {gasto[3]} el día {gasto[5]}"
+        mensaje += f"{gasto[1]} ha gastado {gasto[2]}€ en {gasto[3]} el día {gasto[5]}\n"
     await update.message.reply_text(mensaje)    
 
 
@@ -69,11 +69,21 @@ async def saldar(update, context):
     
     acreedor_id = obtener_id_por_username(usuario)
 
+    comprobacion_deuda = obtener_deudas_usuario(update.message.from_user.id)
+
+    if not comprobacion_deuda:
+        await update.message.reply_text("No se han encontrado deudas en tu usuario")
+        return
+    
     if acreedor_id is None:
         await update.message.reply_text("No encontré ese usuario. Asegúrate de que esté registrado en el bot.")
         return
-
-    saldar_deuda(update.message.from_user.id, acreedor_id[0])
+    
+    comprobacion_deuda_correcta = saldar_deuda(update.message.from_user.id, acreedor_id[0])
+    
+    if not comprobacion_deuda_correcta:
+        await update.message.reply_text("No se ha encontrado la deuda que quieres saldar")
+        return
 
     await update.message.reply_text(f"{update.message.from_user.first_name} ha saldado su deuda con {usuario} ")
 

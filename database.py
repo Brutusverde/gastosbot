@@ -137,7 +137,7 @@ def saldar_deuda(deudor_id, acreedor_id):
                        WHERE deudor_id = ? AND acreedor_id = ?
                        ''', (deudor_id, acreedor_id))
         conn.commit()
-
+        return cursor.rowcount
 
 
 def obtener_total_gastado(usuario_id):
