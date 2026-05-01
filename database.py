@@ -208,3 +208,47 @@ def obtener_gastos_por_categoria(usuario_id):
         ''', (usuario_id,))
         gastos_categoria = cursor.fetchall()
         return gastos_categoria
+
+def crear_grupo(nombre, codigo_invitacion, telegram_chat_id):
+    """Crea un grupo con su contraseña"""
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+
+        cursor.execute('INSERT OR IGNORE INTO grupos (nombre, codigo_invitacion, telegram_chat_id) VALUES (?,?,?)', (nombre, codigo_invitacion, telegram_chat_id))
+        conn.commit()
+        return cursor.rowcount 
+
+def añadir_usuario_grupo(user_id, group_id, es_admin):
+    """Añade u usuario a un grupo existente"""
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+
+        cursor.execute('INSERT OR IGNORE INTO user_groups (user_id, group_id, es_admin) VALUES (?,?,?)', (user_id, group_id, es_admin))
+        conn.commit()
+        return cursor.rowcount 
+
+def obtener_grupo(chat_id):
+    """Devuelve el grupo"""
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT *
+            FROM grupos
+            WHERE telegram_chat_id = ?
+        ''', (chat_id,))
+
+        grupos = cursor.fetchone()
+        return grupos
+
+def obtener_miembros_grupo(group_id):
+    """Devuelve todos los usuarios pertenecientes a un grupo"""
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT usuarios.id, usuarios.nombre, usuarios.username, user_groups.group_id
+            FROM user_groups
+            JOIN usuarios ON usuarios.id = user_groups.user_id 
+            WHERE user_groups.group_id = ?
+        ''', (group_id,))
+        miembros_grupo = cursor.fetchall()
+        return miembros_grupo
