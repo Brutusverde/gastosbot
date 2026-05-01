@@ -1,6 +1,6 @@
 from database import obtener_gastos, obtener_deudas, registrar_usuario, registrar_gasto, saldar_deuda, obtener_deudas_usuario, obtener_id_por_username
-from database import obtener_total_gastado, obtener_total_deuda, obtener_total_a_cobrar, obtener_gastos_por_categoria
-from logica import calcular_deudas
+from database import obtener_total_gastado, obtener_total_deuda, obtener_total_a_cobrar, obtener_gastos_por_categoria, crear_grupo, añadir_usuario_grupo, obtener_grupo
+from logica import calcular_deudas, crear_codigo
 
 
 async def start(update, context):
@@ -113,3 +113,20 @@ Te deben {total_a_cobrar[0] or 0}€
 
 *Tus gastos por categoría*
 {mensaje_categorias}""",  parse_mode='Markdown')
+    
+async def handler_crear_grupo(update, context):
+    """Crea el grupo en el bot"""
+    if len(context.args) < 1:
+        await update.message.reply_text(f"Error al crear tu grupo. Uso correcto: /crear_grupo [nombre]")
+        return
+    
+    nombre_grupo = " ".join(context.args)
+    codigo = crear_codigo()
+    user_id = update.message.from_user.id
+    chat_id = update.message.chat_id
+
+    crear_grupo(nombre_grupo, codigo, chat_id)
+    grupo = obtener_grupo(chat_id)
+
+    añadir_usuario_grupo(user_id, grupo[0], 1)
+    await update.message.reply_text(f"El código para el grupo {grupo[1]} es {codigo}")
