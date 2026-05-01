@@ -9,8 +9,11 @@ async def start(update, context):
         await update.message.reply_text("Para poder registrate, debes tener un nombre de usuario de Telegram (@username)")
         return
 
-    registrar_usuario(update.message.from_user.id, update.message.from_user.first_name, update.message.from_user.username)
-    await update.message.reply_text("Bienvenido! Tu usuario ha sido registrado")
+    registro_usuario = registrar_usuario(update.message.from_user.id, update.message.from_user.first_name, update.message.from_user.username)
+    if registro_usuario == 0:
+        await update.message.reply_text(f"¡Bienvenido de nuevo, {update.message.from_user.first_name}!")
+    else:
+        await update.message.reply_text("Bienvenido! Tu usuario ha sido registrado")
 
 async def gasto(update, context):
     """Recoje un gasto y crea las correspondientes deudas"""

@@ -49,6 +49,7 @@ def registrar_usuario(id, nombre, username):
 
         cursor.execute('INSERT OR IGNORE INTO usuarios (id, nombre, username) VALUES (?,?,?)', (id, nombre, username))
         conn.commit()
+        return cursor.rowcount
 
 
 def registrar_gasto(pagador_id, cantidad, descripcion, categoria="general"):
