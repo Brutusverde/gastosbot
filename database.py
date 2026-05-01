@@ -1,7 +1,7 @@
 import sqlite3
 from datetime import datetime
 
-DB_NAME = "gastos.db"
+DB_NAME = "/data/gastos.db"
 
 
 def inicializar_db():
