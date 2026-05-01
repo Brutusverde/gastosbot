@@ -252,3 +252,16 @@ def obtener_miembros_grupo(group_id):
         ''', (group_id,))
         miembros_grupo = cursor.fetchall()
         return miembros_grupo
+
+def obtener_grupo_por_codigo(codigo):
+    """Devuelve un grupo por su codigo"""
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT codigo_invitacion
+            FROM grupos
+            WHERE codigo_invitacion = ?
+        ''', (codigo,))
+
+        codigo_grupo = cursor.fetchone()
+        return codigo_grupo

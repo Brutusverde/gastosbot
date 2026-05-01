@@ -1,6 +1,6 @@
 from database import obtener_gastos, obtener_deudas, registrar_usuario, registrar_gasto, saldar_deuda, obtener_deudas_usuario, obtener_id_por_username
 from database import obtener_total_gastado, obtener_total_deuda, obtener_total_a_cobrar, obtener_gastos_por_categoria
-from calculadora import calcular_deudas
+from logica import calcular_deudas
 
 
 async def start(update, context):
