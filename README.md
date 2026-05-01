@@ -79,3 +79,25 @@ TOKEN=tu_token_aquí
 ```bash
 python bot.py
 ```
+
+---
+
+## 🗺️ Roadmap
+
+### ✅ Completado
+- Registro de usuarios
+- Registro de gastos con categorías
+- Cálculo automático de deudas
+- Historial de gastos
+- Resumen mensual
+- Despliegue en Fly.io con volumen persistente
+
+### 🚧 En desarrollo
+- Sistema de grupos con código de invitación
+
+### 📋 Planificado
+- Mejoras en gastos (editar, eliminar, splits personalizados)
+- Recordatorios automáticos de deudas
+- Lista de la compra compartida
+- Tareas del hogar
+- Exportar resumen en PDF
