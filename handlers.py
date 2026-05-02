@@ -15,8 +15,21 @@ async def start(update, context):
     else:
         await update.message.reply_text("Bienvenido! Tu usuario ha sido registrado")
 
+async def verificar_usuario(update):
+    """Registra al usuario en la base de datos si es su primera vez"""
+    if update.message.from_user.username is None:
+        await update.message.reply_text("Para poder registrate, debes tener un nombre de usuario de Telegram (@username)")
+        return False
+    else:
+        registrar_usuario(update.message.from_user.id, update.message.from_user.first_name, update.message.from_user.username)
+        return True
+
 async def gasto(update, context):
     """Recoje un gasto y crea las correspondientes deudas"""
+
+    if not await verificar_usuario(update):
+        return
+
     gasto_usuario = context.args
     id = update.message.from_user.id
     chat_id = update.message.chat_id
@@ -41,7 +54,9 @@ async def gasto(update, context):
 
 async def deudas(update, context):
     """Muestra todas las deudas del grupo"""
-
+    if not await verificar_usuario(update):
+        return
+    
     deudas = obtener_deudas()
     mensaje = "Las deudas del grupo son:\n"
     for elemento in deudas:
@@ -50,6 +65,8 @@ async def deudas(update, context):
 
 async def misdeudas(update, context):
     """Muestra las deudas concretas del usuario"""
+    if not await verificar_usuario(update):
+        return
 
     misdeudas = obtener_deudas_usuario(update.message.from_user.id)
     mensaje = "Tus deudas son:\n"
@@ -59,7 +76,9 @@ async def misdeudas(update, context):
 
 async def historial(update, context):
     """Muestra un historial de los ultimos gastos del grupo"""
-
+    if not await verificar_usuario(update):
+        return
+    
     gastos = obtener_gastos()
     mensaje = "Los últimos gastos son:\n"
 
@@ -70,15 +89,15 @@ async def historial(update, context):
 
 async def saldar(update, context):
     """Salda una deuda de un usuario"""
+    if not await verificar_usuario(update):
+        return
     
     if len(context.args) < 1:
         await update.message.reply_text("Error al saldar tu deuda. Uso correcto: /saldar [@usuario]")
         return
     
     usuario = context.args[0]
-    
     acreedor_id = obtener_id_por_username(usuario)
-
     comprobacion_deuda = obtener_deudas_usuario(update.message.from_user.id)
 
     if not comprobacion_deuda:
@@ -100,6 +119,8 @@ async def saldar(update, context):
 
 async def resumen(update, context):
     """Obtener un resumen del mes de un usuario"""
+    if not await verificar_usuario(update):
+        return
 
     id = update.message.from_user.id
     mensaje_categorias = ""
@@ -123,6 +144,9 @@ Te deben {total_a_cobrar[0] or 0}€
     
 async def handler_crear_grupo(update, context):
     """Crea el grupo en el bot"""
+    if not await verificar_usuario(update):
+        return
+    
     if len(context.args) < 1:
         await update.message.reply_text(f"Error al crear tu grupo. Uso correcto: /crear_grupo [nombre]")
         return
@@ -146,6 +170,8 @@ async def handler_crear_grupo(update, context):
 
 async def handler_unirse (update, context):
     """Añade a un usuario a un grupo"""
+    if not await verificar_usuario(update):
+        return
     if len(context.args) < 1:
         await update.message.reply_text(f"Necesitas un código para unirte a un grupo. Uso correcto: /unirse [código]")
         return
