@@ -172,14 +172,14 @@ async def resumen(update, context):
     for gasto in gastos_categoria:
         mensaje_categorias += f"• *{gasto[1]}*: {gasto[0]}€\n"
 
-    await update.message.reply_text(f"""📊 *Resumen de {update.message.from_user.first_name}*
-
-    💰 Total gastado este mes: *{gasto_total[0] or 0}€*
-    📉 Total deudas: *{deuda_total[0] or 0}€*
-    📈 Te deben: *{total_a_cobrar[0] or 0}€*
-
-    *Gastos por categoría*
-    {mensaje_categorias}""", parse_mode='Markdown')
+    await update.message.reply_text(
+    f"📊 *Resumen de {update.message.from_user.first_name}*\n\n"
+    f"💰 Total gastado este mes: *{gasto_total[0] or 0}€*\n"
+    f"📉 Total deudas: *{deuda_total[0] or 0}€*\n"
+    f"📈 Te deben: *{total_a_cobrar[0] or 0}€*\n\n"
+    f"*Gastos por categoría*\n"
+    f"{mensaje_categorias}",
+    parse_mode='Markdown')
     
 async def handler_crear_grupo(update, context):
     """Crea un grupo en la base de datos y añade al creador como administrador de este. Genera un código de invitación y comprueba que sea único"""
