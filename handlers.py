@@ -19,8 +19,15 @@ async def gasto(update, context):
     """Recoje un gasto y crea las correspondientes deudas"""
     gasto_usuario = context.args
     id = update.message.from_user.id
+    chat_id = update.message.chat_id
+    group_id =  obtener_grupo(chat_id)
+
     if len(gasto_usuario) < 2:
         await update.message.reply_text("Error al añadir tu gasto. Uso correcto: /gasto [cantidad] [descripción] [categoría opcional]")
+        return
+    
+    if group_id is None:
+        await update.message.reply_text("Error al añadir tu gasto. No perteneces a un grupo. Crea uno o únete")
         return
 
     if len(gasto_usuario) == 2:
@@ -28,7 +35,7 @@ async def gasto(update, context):
     else:
         registrar_gasto(id, float(gasto_usuario[0]), gasto_usuario[1], gasto_usuario[2])
 
-    calcular_deudas(id, float(gasto_usuario[0]))
+    calcular_deudas(id, float(gasto_usuario[0]), group_id[0])
 
     await update.message.reply_text(f"Tu gasto de {gasto_usuario[0]} en {gasto_usuario[1]} se ha registrado")
 
