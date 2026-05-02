@@ -57,7 +57,14 @@ async def deudas(update, context):
     if not await verificar_usuario(update):
         return
     
-    deudas = obtener_deudas()
+    chat_id = update.message.chat_id
+    group_id =  obtener_grupo(chat_id)
+
+    if group_id is None:
+        await update.message.reply_text("Error al buscar tus deudas. No perteneces a un grupo. Crea uno o únete")
+        return
+
+    deudas = obtener_deudas(group_id[0])
     mensaje = "Las deudas del grupo son:\n"
     for elemento in deudas:
         mensaje += f"{elemento[2]} le debe {elemento[5]}€ a {elemento[4]}\n"
@@ -79,7 +86,14 @@ async def historial(update, context):
     if not await verificar_usuario(update):
         return
     
-    gastos = obtener_gastos()
+    chat_id = update.message.chat_id
+    group_id =  obtener_grupo(chat_id)
+
+    if group_id is None:
+        await update.message.reply_text("Error al mostrar tu historial. No perteneces a un grupo. Crea uno o únete")
+        return
+    
+    gastos = obtener_gastos(group_id[0])
     mensaje = "Los últimos gastos son:\n"
 
     for gasto in gastos[:10]:

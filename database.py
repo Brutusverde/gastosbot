@@ -106,7 +106,7 @@ def obtener_id_por_username(username):
         username_id = cursor.fetchone()
         return username_id
 
-def obtener_gastos():
+def obtener_gastos(group_id):
     """Devuelve todos los gastos de la base de datos y los ordena de más actual a más antiguo"""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
@@ -114,22 +114,25 @@ def obtener_gastos():
             SELECT gastos.id, usuarios.nombre, gastos.cantidad, gastos.descripcion, gastos.categoria, gastos.fecha
             FROM gastos
             JOIN usuarios ON usuarios.id = gastos.pagador_id
+            JOIN user_groups as grupos ON grupos.user_id = gastos.pagador_id
+            WHERE grupos.group_id = ?
             ORDER BY gastos.fecha DESC
-        ''')
+        ''',(group_id,))
         gastos = cursor.fetchall()
         return gastos
     
-def obtener_deudas():
+def obtener_deudas(group_id):
     """Obtiene todas las deudas de la base de datos que no han sido saldadas"""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT deudas.id, deudas.deudor_id, usuario1.nombre, deudas.acreedor_id, usuario2.nombre, deudas.cantidad
+            SELECT deudas.id, deudas.deudor_id, usuario1.nombre, deudas.acreedor_id, usuario2.nombre, deudas.cantidad, grupos.group_id
             FROM deudas
             JOIN usuarios as usuario1 ON usuario1.id = deudas.deudor_id
             JOIN usuarios as usuario2 ON usuario2.id = deudas.acreedor_id
-            WHERE saldada = 0
-        ''')
+            JOIN user_groups as grupos ON grupos.user_id = deudas.deudor_id
+            WHERE saldada = 0 AND grupos.group_id = ?
+        ''', (group_id,))
         deudas = cursor.fetchall()
         return deudas
     
