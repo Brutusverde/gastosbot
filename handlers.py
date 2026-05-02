@@ -66,9 +66,13 @@ async def deudas(update, context):
 
     deudas = obtener_deudas(group_id[0])
     mensaje = "Las deudas del grupo son:\n"
-    for elemento in deudas:
-        mensaje += f"{elemento[2]} le debe {elemento[5]}€ a {elemento[4]}\n"
-    await update.message.reply_text(mensaje)
+
+    if len(deudas) == 0:
+        await update.message.reply_text("No hay deudas pendientes")
+    else:
+        for elemento in deudas:
+            mensaje += f"{elemento[2]} le debe {elemento[5]}€ a {elemento[4]}\n"
+        await update.message.reply_text(mensaje)
 
 async def misdeudas(update, context):
     """Muestra las deudas no pagadas de un usuario perteneciente a un grupo. Controla que el usuario pertenezca a un grupo"""
@@ -84,9 +88,13 @@ async def misdeudas(update, context):
     
     misdeudas = obtener_deudas_usuario(update.message.from_user.id, group_id[0])
     mensaje = "Tus deudas son:\n"
-    for elemento in misdeudas:
-        mensaje += f"Le debes {elemento[5]}€ a {elemento[4]}\n"
-    await update.message.reply_text(mensaje)
+
+    if len(misdeudas) == 0:
+        await update.message.reply_text("No hay deudas pendientes")
+    else:
+        for elemento in misdeudas:
+            mensaje += f"Le debes {elemento[5]}€ a {elemento[4]}\n"
+        await update.message.reply_text(mensaje)
 
 async def historial(update, context):
     """Muestra un historial de los últimos gastos del grupo. Controla que el usuario pertenezca a un grupo"""
@@ -103,9 +111,12 @@ async def historial(update, context):
     gastos = obtener_gastos(group_id[0])
     mensaje = "Los últimos gastos son:\n"
 
-    for gasto in gastos[:10]:
-        mensaje += f"{gasto[1]} ha gastado {gasto[2]}€ en {gasto[3]} el día {gasto[5]}\n"
-    await update.message.reply_text(mensaje)    
+    if len(gastos) == 0:
+        await update.message.reply_text("Aún no hay ningún gasto")
+    else:
+        for gasto in gastos[:10]:
+            mensaje += f"{gasto[1]} ha gastado {gasto[2]}€ en {gasto[3]} el día {gasto[5]}\n"
+        await update.message.reply_text(mensaje)    
 
 
 async def saldar(update, context):
