@@ -258,10 +258,24 @@ def obtener_grupo_por_codigo(codigo):
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT codigo_invitacion
+            SELECT *
             FROM grupos
             WHERE codigo_invitacion = ?
         ''', (codigo,))
 
         codigo_grupo = cursor.fetchone()
         return codigo_grupo
+    
+
+def obtener_usuario_en_grupo(user_id, group_id):
+    """Devuelve un usuario si pertenece a un grupo"""
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT *
+            FROM user_groups
+            WHERE group_id = ? AND user_id = ?
+        ''', (group_id, user_id))
+
+        usuario_grupo = cursor.fetchone()
+        return usuario_grupo

@@ -19,6 +19,7 @@ def main():
     app.add_handler(CommandHandler("saldar", handlers.saldar))
     app.add_handler(CommandHandler("resumen", handlers.resumen))
     app.add_handler(CommandHandler("crear_grupo", handlers.handler_crear_grupo))
+    app.add_handler(CommandHandler("unirse", handlers.handler_unirse))
     
     app.run_polling()
 

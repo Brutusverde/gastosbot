@@ -1,5 +1,5 @@
-from database import obtener_gastos, obtener_deudas, registrar_usuario, registrar_gasto, saldar_deuda, obtener_deudas_usuario, obtener_id_por_username
-from database import obtener_total_gastado, obtener_total_deuda, obtener_total_a_cobrar, obtener_gastos_por_categoria, crear_grupo, añadir_usuario_grupo, obtener_grupo
+from database import obtener_gastos, obtener_deudas, registrar_usuario, registrar_gasto, saldar_deuda, obtener_deudas_usuario, obtener_id_por_username, obtener_usuario_en_grupo
+from database import obtener_total_gastado, obtener_total_deuda, obtener_total_a_cobrar, obtener_gastos_por_categoria, crear_grupo, añadir_usuario_grupo, obtener_grupo, obtener_grupo_por_codigo
 from logica import calcular_deudas, crear_codigo
 
 
@@ -136,3 +136,26 @@ async def handler_crear_grupo(update, context):
 
     añadir_usuario_grupo(user_id, grupo[0], 1)
     await update.message.reply_text(f"El código para el grupo {grupo[1]} es {codigo}")
+
+async def handler_unirse (update, context):
+    """Añade a un usuario a un grupo"""
+    if len(context.args) < 1:
+        await update.message.reply_text(f"Necesitas un código para unirte a un grupo. Uso correcto: /unirse [código]")
+        return
+    
+    id = update.message.from_user.id
+    
+    grupo_unirse = obtener_grupo_por_codigo(context.args[0])
+
+    if grupo_unirse is None:
+        await update.message.reply_text(f"El grupo al que intentas unirte no existe")
+        return
+
+    usuario_en_grupo = obtener_usuario_en_grupo(id, grupo_unirse[0])
+
+    if usuario_en_grupo is not None:
+        await update.message.reply_text(f"Ya perteneces a este grupo")
+        return
+
+    añadir_usuario_grupo(id,grupo_unirse[0], 0)
+    await update.message.reply_text(f"{update.message.from_user.first_name}, se te ha añadido al grupo {grupo_unirse[1]}")
