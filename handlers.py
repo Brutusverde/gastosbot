@@ -6,7 +6,7 @@ from logica import calcular_deudas, crear_codigo
 async def start(update, context):
     """Registra a un usuario en la base de datos. Devuelve un mensaje distinto si el usuario ya existía en la base de datos con anterioridad"""
     if update.message.from_user.username is None:
-        await update.message.reply_text("Para poder registrate, debes tener un nombre de usuario de Telegram (@username)")
+        await update.message.reply_text("⚠️ Necesitas un nombre de usuario de Telegram (@username) para usar el bot.")
         return
 
     registro_usuario = registrar_usuario(update.message.from_user.id, update.message.from_user.first_name, update.message.from_user.username)
@@ -18,7 +18,7 @@ async def start(update, context):
 async def verificar_usuario(update):
     """Registra un usuario en la base de datos de forma silenciosa. Solo devuelve un mensaje si la creación ha fallado"""
     if update.message.from_user.username is None:
-        await update.message.reply_text("Para poder registrate, debes tener un nombre de usuario de Telegram (@username)")
+        await update.message.reply_text("⚠️ Necesitas un nombre de usuario de Telegram (@username) para usar el bot.")
         return False
     else:
         registrar_usuario(update.message.from_user.id, update.message.from_user.first_name, update.message.from_user.username)
@@ -36,11 +36,11 @@ async def gasto(update, context):
     group_id =  obtener_grupo(chat_id)
 
     if len(gasto_usuario) < 2:
-        await update.message.reply_text("Error al añadir tu gasto. Uso correcto: /gasto [cantidad] [descripción] [categoría opcional]")
+        await update.message.reply_text("⚠️ Uso correcto: /gasto [cantidad] [descripción] [categoría opcional]")
         return
     
     if group_id is None:
-        await update.message.reply_text("Error al añadir tu gasto. No perteneces a un grupo. Crea uno o únete")
+        await update.message.reply_text("⚠️ No perteneces a ningún grupo. Usa /crear_grupo o /unirse.")
         return
 
     if len(gasto_usuario) == 2:
@@ -50,7 +50,7 @@ async def gasto(update, context):
 
     calcular_deudas(id, float(gasto_usuario[0]), group_id[0])
 
-    await update.message.reply_text(f"Tu gasto de {gasto_usuario[0]} en {gasto_usuario[1]} se ha registrado")
+    await update.message.reply_text(f"✅ Gasto de *{gasto_usuario[0]}€* en *{gasto_usuario[1]}* registrado correctamente", parse_mode='Markdown')
 
 async def deudas(update, context):
     """Muestra todas las deudas del grupo que no han sido saldadas. Controla que el usuario pertenezca a un grupo"""
@@ -61,18 +61,18 @@ async def deudas(update, context):
     group_id =  obtener_grupo(chat_id)
 
     if group_id is None:
-        await update.message.reply_text("Error al buscar tus deudas. No perteneces a un grupo. Crea uno o únete")
+        await update.message.reply_text("⚠️ No perteneces a ningún grupo. Usa /crear_grupo o /unirse.")
         return
 
     deudas = obtener_deudas(group_id[0])
     mensaje = "Las deudas del grupo son:\n"
 
     if len(deudas) == 0:
-        await update.message.reply_text("No hay deudas pendientes")
+        await update.message.reply_text("✅ No hay deudas pendientes en el grupo")
     else:
+        mensaje = "💸 *Deudas del grupo*\n\n"
         for elemento in deudas:
-            mensaje += f"{elemento[2]} le debe {elemento[5]}€ a {elemento[4]}\n"
-        await update.message.reply_text(mensaje)
+            mensaje += f"👤 *{elemento[2]}* le debe *{elemento[5]}€* a *{elemento[4]}*\n"
 
 async def misdeudas(update, context):
     """Muestra las deudas no pagadas de un usuario perteneciente a un grupo. Controla que el usuario pertenezca a un grupo"""
@@ -83,18 +83,18 @@ async def misdeudas(update, context):
     group_id =  obtener_grupo(chat_id)
 
     if group_id is None:
-        await update.message.reply_text("Error al buscar tus deudas. No perteneces a un grupo. Crea uno o únete")
+        await update.message.reply_text("⚠️ No perteneces a ningún grupo. Usa /crear_grupo o /unirse.")
         return
     
     misdeudas = obtener_deudas_usuario(update.message.from_user.id, group_id[0])
     mensaje = "Tus deudas son:\n"
 
     if len(misdeudas) == 0:
-        await update.message.reply_text("No hay deudas pendientes")
+        await update.message.reply_text("✅ No tienes deudas pendientes")
     else:
+        mensaje = "💳 *Tus deudas pendientes*\n\n"
         for elemento in misdeudas:
-            mensaje += f"Le debes {elemento[5]}€ a {elemento[4]}\n"
-        await update.message.reply_text(mensaje)
+            mensaje += f"• Le debes *{elemento[5]}€* a *{elemento[4]}*\n"
 
 async def historial(update, context):
     """Muestra un historial de los últimos gastos del grupo. Controla que el usuario pertenezca a un grupo"""
@@ -105,18 +105,18 @@ async def historial(update, context):
     group_id =  obtener_grupo(chat_id)
 
     if group_id is None:
-        await update.message.reply_text("Error al mostrar tu historial. No perteneces a un grupo. Crea uno o únete")
+        await update.message.reply_text("⚠️ No perteneces a ningún grupo. Usa /crear_grupo o /unirse.")
         return
     
     gastos = obtener_gastos(group_id[0])
     mensaje = "Los últimos gastos son:\n"
 
     if len(gastos) == 0:
-        await update.message.reply_text("Aún no hay ningún gasto")
+        await update.message.reply_text("📋 Aún no hay ningún gasto registrado")
     else:
+        mensaje = "📋 *Últimos gastos del grupo*\n\n"
         for gasto in gastos[:10]:
-            mensaje += f"{gasto[1]} ha gastado {gasto[2]}€ en {gasto[3]} el día {gasto[5]}\n"
-        await update.message.reply_text(mensaje)    
+            mensaje += f"🛒 *{gasto[1]}* gastó *{gasto[2]}€* en {gasto[3]} el {gasto[5]}\n" 
 
 
 async def saldar(update, context):
@@ -125,14 +125,14 @@ async def saldar(update, context):
         return
     
     if len(context.args) < 1:
-        await update.message.reply_text("Error al saldar tu deuda. Uso correcto: /saldar [@usuario]")
+        await update.message.reply_text("⚠️ Uso correcto: /saldar [@usuario]")
         return
     
     chat_id = update.message.chat_id
     group_id =  obtener_grupo(chat_id)
 
     if group_id is None:
-        await update.message.reply_text("Error al saldar tu deuda. No perteneces a un grupo. Crea uno o únete")
+        await update.message.reply_text("⚠️ No perteneces a ningún grupo. Usa /crear_grupo o /unirse.")
         return
     
     usuario = context.args[0]
@@ -140,11 +140,11 @@ async def saldar(update, context):
     comprobacion_deuda = obtener_deudas_usuario(update.message.from_user.id, group_id[0])
 
     if not comprobacion_deuda:
-        await update.message.reply_text("No se han encontrado deudas en tu usuario")
+        await update.message.reply_text("⚠️ No tienes deudas pendientes que saldar.")
         return
     
     if acreedor_id is None:
-        await update.message.reply_text("No encontré ese usuario. Asegúrate de que esté registrado en el bot.")
+        await update.message.reply_text("⚠️ No encontré ese usuario. Asegúrate de que esté registrado en el bot.")
         return
     
     comprobacion_deuda_correcta = saldar_deuda(update.message.from_user.id, acreedor_id[0])
@@ -153,7 +153,7 @@ async def saldar(update, context):
         await update.message.reply_text("No se ha encontrado la deuda que quieres saldar")
         return
 
-    await update.message.reply_text(f"{update.message.from_user.first_name} ha saldado su deuda con {usuario} ")
+    await update.message.reply_text(f"✅ *{update.message.from_user.first_name}* ha saldado su deuda con *{usuario}*", parse_mode='Markdown')
 
 
 async def resumen(update, context):
@@ -170,16 +170,16 @@ async def resumen(update, context):
     gastos_categoria = obtener_gastos_por_categoria(id)
 
     for gasto in gastos_categoria:
-        mensaje_categorias += f"Has gastado {gasto[0]}€ en {gasto[1]}\n"
+        mensaje_categorias += f"• *{gasto[1]}*: {gasto[0]}€\n"
 
-    await update.message.reply_text(f"""*{update.message.from_user.first_name}, aquí tienes tu resumen del mes:*
+    await update.message.reply_text(f"""📊 *Resumen de {update.message.from_user.first_name}*
 
-Has tenido un gasto total de {gasto_total[0] or 0}€
-Tienes una deuda total de {deuda_total[0] or 0}€
-Te deben {total_a_cobrar[0] or 0}€
+    💰 Total gastado este mes: *{gasto_total[0] or 0}€*
+    📉 Total deudas: *{deuda_total[0] or 0}€*
+    📈 Te deben: *{total_a_cobrar[0] or 0}€*
 
-*Tus gastos por categoría*
-{mensaje_categorias}""",  parse_mode='Markdown')
+    *Gastos por categoría*
+    {mensaje_categorias}""", parse_mode='Markdown')
     
 async def handler_crear_grupo(update, context):
     """Crea un grupo en la base de datos y añade al creador como administrador de este. Genera un código de invitación y comprueba que sea único"""
@@ -187,7 +187,7 @@ async def handler_crear_grupo(update, context):
         return
     
     if len(context.args) < 1:
-        await update.message.reply_text(f"Error al crear tu grupo. Uso correcto: /crear_grupo [nombre]")
+        await update.message.reply_text("⚠️ Uso correcto: /crear_grupo [nombre]")
         return
     
     nombre_grupo = " ".join(context.args)
@@ -205,14 +205,14 @@ async def handler_crear_grupo(update, context):
     grupo = obtener_grupo(chat_id)
 
     añadir_usuario_grupo(user_id, grupo[0], 1)
-    await update.message.reply_text(f"El código para el grupo {grupo[1]} es {codigo}")
+    await update.message.reply_text(f"✅ Grupo *{grupo[1]}* creado correctamente\n\n🔑 Código de invitación: `{codigo}`", parse_mode='Markdown')
 
 async def handler_unirse (update, context):
     """Añade a un usuario a un grupo mediante el código de invitación. Comprueba si este usuario ya se había unido antes y manda un mensaje diferente si es así"""
     if not await verificar_usuario(update):
         return
     if len(context.args) < 1:
-        await update.message.reply_text(f"Necesitas un código para unirte a un grupo. Uso correcto: /unirse [código]")
+        await update.message.reply_text("⚠️ Uso correcto: /unirse [código]")
         return
     
     id = update.message.from_user.id
@@ -230,4 +230,4 @@ async def handler_unirse (update, context):
         return
 
     añadir_usuario_grupo(id,grupo_unirse[0], 0)
-    await update.message.reply_text(f"{update.message.from_user.first_name}, se te ha añadido al grupo {grupo_unirse[1]}")
+    await update.message.reply_text(f"✅ *{update.message.from_user.first_name}* se ha unido al grupo *{grupo_unirse[1]}*", parse_mode='Markdown')
