@@ -136,7 +136,7 @@ def obtener_deudas(group_id):
         deudas = cursor.fetchall()
         return deudas
     
-def obtener_deudas_usuario(usuario_id):
+def obtener_deudas_usuario(usuario_id, group_id):
     """Obtiene las deudas individuales del usuario que no han sido saldadas"""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
@@ -145,8 +145,9 @@ def obtener_deudas_usuario(usuario_id):
             FROM deudas
             JOIN usuarios as usuario1 ON usuario1.id = deudas.deudor_id
             JOIN usuarios as usuario2 ON usuario2.id = deudas.acreedor_id
-            WHERE saldada = 0 AND deudas.deudor_id = ?
-        ''', (usuario_id,))
+            JOIN user_groups as grupos ON grupos.user_id = deudas.deudor_id
+            WHERE saldada = 0 AND deudas.deudor_id = ? AND grupos.group_id = ?
+        ''', (usuario_id, group_id))
         deudas_usuario = cursor.fetchall()
         return deudas_usuario
     

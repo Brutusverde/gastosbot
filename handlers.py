@@ -75,7 +75,14 @@ async def misdeudas(update, context):
     if not await verificar_usuario(update):
         return
 
-    misdeudas = obtener_deudas_usuario(update.message.from_user.id)
+    chat_id = update.message.chat_id
+    group_id =  obtener_grupo(chat_id)
+
+    if group_id is None:
+        await update.message.reply_text("Error al buscar tus deudas. No perteneces a un grupo. Crea uno o únete")
+        return
+    
+    misdeudas = obtener_deudas_usuario(update.message.from_user.id, group_id[0])
     mensaje = "Tus deudas son:\n"
     for elemento in misdeudas:
         mensaje += f"Le debes {elemento[5]}€ a {elemento[4]}\n"
@@ -110,9 +117,16 @@ async def saldar(update, context):
         await update.message.reply_text("Error al saldar tu deuda. Uso correcto: /saldar [@usuario]")
         return
     
+    chat_id = update.message.chat_id
+    group_id =  obtener_grupo(chat_id)
+
+    if group_id is None:
+        await update.message.reply_text("Error al saldar tu deuda. No perteneces a un grupo. Crea uno o únete")
+        return
+    
     usuario = context.args[0]
     acreedor_id = obtener_id_por_username(usuario)
-    comprobacion_deuda = obtener_deudas_usuario(update.message.from_user.id)
+    comprobacion_deuda = obtener_deudas_usuario(update.message.from_user.id, group_id[0])
 
     if not comprobacion_deuda:
         await update.message.reply_text("No se han encontrado deudas en tu usuario")
