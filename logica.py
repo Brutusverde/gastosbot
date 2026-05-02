@@ -1,12 +1,13 @@
-from database import obtener_usuarios, registrar_deuda, obtener_grupo_por_codigo
+from database import obtener_usuarios, registrar_deuda, obtener_grupo_por_codigo, obtener_miembros_grupo
 import secrets
 
 
-def calcular_deudas(pagador_id, cantidad):
+def calcular_deudas(pagador_id, cantidad, group_id):
     """Divide la cantidad del gasto entre el numero de usuarios y crea una deuda a todos los usuarios que no sean el que ha pagado"""
-    usuarios = obtener_usuarios()
-    deuda_individual = cantidad/ len(usuarios)
-    for usuario in usuarios:
+    usuarios_grupo = obtener_miembros_grupo(group_id)
+
+    deuda_individual = cantidad/ len(usuarios_grupo)
+    for usuario in usuarios_grupo:
         if usuario[0] != pagador_id:
             registrar_deuda(usuario[0], pagador_id, deuda_individual)
 
