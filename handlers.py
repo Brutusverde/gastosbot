@@ -71,8 +71,10 @@ async def deudas(update, context):
         await update.message.reply_text("✅ No hay deudas pendientes en el grupo")
     else:
         mensaje = "💸 *Deudas del grupo*\n\n"
+        
         for elemento in deudas:
             mensaje += f"👤 *{elemento[2]}* le debe *{elemento[5]}€* a *{elemento[4]}*\n"
+        await update.message.reply_text(mensaje, parse_mode='Markdown')
 
 async def misdeudas(update, context):
     """Muestra las deudas no pagadas de un usuario perteneciente a un grupo. Controla que el usuario pertenezca a un grupo"""
@@ -95,6 +97,7 @@ async def misdeudas(update, context):
         mensaje = "💳 *Tus deudas pendientes*\n\n"
         for elemento in misdeudas:
             mensaje += f"• Le debes *{elemento[5]}€* a *{elemento[4]}*\n"
+        await update.message.reply_text(mensaje, parse_mode='Markdown')
 
 async def historial(update, context):
     """Muestra un historial de los últimos gastos del grupo. Controla que el usuario pertenezca a un grupo"""
@@ -117,6 +120,7 @@ async def historial(update, context):
         mensaje = "📋 *Últimos gastos del grupo*\n\n"
         for gasto in gastos[:10]:
             mensaje += f"🛒 *{gasto[1]}* gastó *{gasto[2]}€* en {gasto[3]} el {gasto[5]}\n" 
+        await update.message.reply_text(mensaje, parse_mode='Markdown')
 
 
 async def saldar(update, context):
