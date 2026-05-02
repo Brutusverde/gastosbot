@@ -5,7 +5,7 @@ DB_NAME = "/data/gastos.db"
 
 
 def inicializar_db():
-    """Crea la base de datos si no existe. SI no la ignora"""
+    """Inicializa la base de datos y crea las tablas si no existen"""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
 
@@ -62,7 +62,7 @@ def inicializar_db():
         conn.commit()
 
 def registrar_usuario(id, nombre, username):
-    """Registra un usuario si no existe. Si no lo ignora"""
+    """Registra un usuario en la base de datos. Devuelve 1 si es nuevo o 0 si ya existía"""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
 
@@ -70,9 +70,8 @@ def registrar_usuario(id, nombre, username):
         conn.commit()
         return cursor.rowcount
 
-
 def registrar_gasto(pagador_id, cantidad, descripcion, categoria="general"):
-    """Registra un gasto en la base de datos"""
+    """Registra un gasto en la base de datos. Guarda el id del pagador, la descripcion del gasto, la categoría y la fecha"""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         fecha = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -80,7 +79,7 @@ def registrar_gasto(pagador_id, cantidad, descripcion, categoria="general"):
         conn.commit()
 
 def registrar_deuda(deudor_id, acreedor_id, cantidad):
-    """Registra una deuda en la base de datos"""
+    """Registra una deuda en la base de datos. Guarda el id del deudor, el id del acreedor y la cantidad de la deuda"""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute('INSERT INTO deudas (deudor_id, acreedor_id, cantidad) VALUES (?, ?, ?)', (deudor_id, acreedor_id, cantidad))
@@ -95,7 +94,7 @@ def obtener_usuarios():
         return usuarios
     
 def obtener_id_por_username(username):
-    """Devuelve el id buscando por username"""
+    """Devuelve el id de un usuario buscándolo en la base de datos mediante su username"""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -107,7 +106,7 @@ def obtener_id_por_username(username):
         return username_id
 
 def obtener_gastos(group_id):
-    """Devuelve todos los gastos de la base de datos y los ordena de más actual a más antiguo"""
+    """Devuelve todos los gastos de un grupo y los ordena de más actual a más antiguo"""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -122,7 +121,7 @@ def obtener_gastos(group_id):
         return gastos
     
 def obtener_deudas(group_id):
-    """Obtiene todas las deudas de la base de datos que no han sido saldadas"""
+    """Obtiene todas las deudas de un grupo y devuelve las que no han sido saldadas"""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -137,7 +136,7 @@ def obtener_deudas(group_id):
         return deudas
     
 def obtener_deudas_usuario(usuario_id, group_id):
-    """Obtiene las deudas individuales del usuario que no han sido saldadas"""
+    """Obtiene las deudas individuales de un usuario en un grupo y devuelve las que no han sido saldadas"""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -152,7 +151,7 @@ def obtener_deudas_usuario(usuario_id, group_id):
         return deudas_usuario
     
 def saldar_deuda(deudor_id, acreedor_id):
-    """Marca como saldada la deuda que cumpla con el deudor id y el acreedor id"""
+    """Marca como saldada la deuda entre un deudor y un acreedor. Devuelve el número de filas afectadas"""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -163,9 +162,8 @@ def saldar_deuda(deudor_id, acreedor_id):
         conn.commit()
         return cursor.rowcount
 
-
 def obtener_total_gastado(usuario_id):
-    """Devuelve el gasto total de un unico usuario por id"""
+    """Devuelve el gasto total de un usuario en el mes actual"""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -177,7 +175,7 @@ def obtener_total_gastado(usuario_id):
         return total_gastado
     
 def obtener_total_deuda(usuario_id):
-    """Devuelve la deuda total de un unico usuario por id"""
+    """Devuelve las deudas totales no saldadas de un usuario"""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -189,7 +187,7 @@ def obtener_total_deuda(usuario_id):
         return total_deuda
     
 def obtener_total_a_cobrar(usuario_id):
-    """Devuelve el total a cobrar de un unico usuario por id"""
+    """Devuelve la suma de las cantidades pendientes que se deben a un usuario"""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -201,7 +199,7 @@ def obtener_total_a_cobrar(usuario_id):
         return total_a_cobrar
     
 def obtener_gastos_por_categoria(usuario_id):
-    """Devuelve los gastos totales divididos por categorias para un unico usuario por id"""
+    """Devuelve los gastos totales del mes actual  de un usuario separados por su categoría"""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -214,7 +212,7 @@ def obtener_gastos_por_categoria(usuario_id):
         return gastos_categoria
 
 def crear_grupo(nombre, codigo_invitacion, telegram_chat_id):
-    """Crea un grupo con su contraseña"""
+    """Crea un grupo y guarda su contraseña de invitación. Devuelve 1 si se ha creado y 0 si el grupo ya existía"""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
 
@@ -223,7 +221,7 @@ def crear_grupo(nombre, codigo_invitacion, telegram_chat_id):
         return cursor.rowcount 
 
 def añadir_usuario_grupo(user_id, group_id, es_admin):
-    """Añade u usuario a un grupo existente"""
+    """Añade un usuario a un grupo. Si el usuario ya formaba parte del grupo, devuelve 0. Si no, devuelve 1"""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
 
@@ -232,7 +230,7 @@ def añadir_usuario_grupo(user_id, group_id, es_admin):
         return cursor.rowcount 
 
 def obtener_grupo(chat_id):
-    """Devuelve el grupo"""
+    """Devuelve la información completa de un grupo utilizando el id del chat de telegram para buscarlo en la base de datos"""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -258,7 +256,7 @@ def obtener_miembros_grupo(group_id):
         return miembros_grupo
 
 def obtener_grupo_por_codigo(codigo):
-    """Devuelve un grupo por su codigo"""
+    """Devuelve la información completa de un grupo utilizando el código de invitación para buscarlo en la base de datos"""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -272,7 +270,7 @@ def obtener_grupo_por_codigo(codigo):
     
 
 def obtener_usuario_en_grupo(user_id, group_id):
-    """Devuelve un usuario si pertenece a un grupo"""
+    """Devuelve todos datos que relacionan a un usuario con el grupo al que pertenece"""
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()
         cursor.execute('''

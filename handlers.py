@@ -4,7 +4,7 @@ from logica import calcular_deudas, crear_codigo
 
 
 async def start(update, context):
-    """Registra al usuario en la base de datos si es su primera vez"""
+    """Registra a un usuario en la base de datos. Devuelve un mensaje distinto si el usuario ya existía en la base de datos con anterioridad"""
     if update.message.from_user.username is None:
         await update.message.reply_text("Para poder registrate, debes tener un nombre de usuario de Telegram (@username)")
         return
@@ -16,7 +16,7 @@ async def start(update, context):
         await update.message.reply_text("Bienvenido! Tu usuario ha sido registrado")
 
 async def verificar_usuario(update):
-    """Registra al usuario en la base de datos si es su primera vez"""
+    """Registra un usuario en la base de datos de forma silenciosa. Solo devuelve un mensaje si la creación ha fallado"""
     if update.message.from_user.username is None:
         await update.message.reply_text("Para poder registrate, debes tener un nombre de usuario de Telegram (@username)")
         return False
@@ -25,7 +25,7 @@ async def verificar_usuario(update):
         return True
 
 async def gasto(update, context):
-    """Recoje un gasto y crea las correspondientes deudas"""
+    """Recoje un gasto y crea las correspondientes deudas. Controla que el usuario pertenezca a un grupo y valida que se han proporcionado los argumentos necesarios"""
 
     if not await verificar_usuario(update):
         return
@@ -53,7 +53,7 @@ async def gasto(update, context):
     await update.message.reply_text(f"Tu gasto de {gasto_usuario[0]} en {gasto_usuario[1]} se ha registrado")
 
 async def deudas(update, context):
-    """Muestra todas las deudas del grupo"""
+    """Muestra todas las deudas del grupo que no han sido saldadas. Controla que el usuario pertenezca a un grupo"""
     if not await verificar_usuario(update):
         return
     
@@ -71,7 +71,7 @@ async def deudas(update, context):
     await update.message.reply_text(mensaje)
 
 async def misdeudas(update, context):
-    """Muestra las deudas concretas del usuario"""
+    """Muestra las deudas no pagadas de un usuario perteneciente a un grupo. Controla que el usuario pertenezca a un grupo"""
     if not await verificar_usuario(update):
         return
 
@@ -89,7 +89,7 @@ async def misdeudas(update, context):
     await update.message.reply_text(mensaje)
 
 async def historial(update, context):
-    """Muestra un historial de los ultimos gastos del grupo"""
+    """Muestra un historial de los últimos gastos del grupo. Controla que el usuario pertenezca a un grupo"""
     if not await verificar_usuario(update):
         return
     
@@ -109,7 +109,7 @@ async def historial(update, context):
 
 
 async def saldar(update, context):
-    """Salda una deuda de un usuario"""
+    """Salda una deuda utilizando el nombre de usuario de telegram del deudor. Controla que el usuario pertenezca a un grupo"""
     if not await verificar_usuario(update):
         return
     
@@ -146,7 +146,7 @@ async def saldar(update, context):
 
 
 async def resumen(update, context):
-    """Obtener un resumen del mes de un usuario"""
+    """Devuelve un resumen mensual de gastos totales, deudas y gastos por categorías de un usuario. Controla que el usuario pertenezca a un grupo"""
     if not await verificar_usuario(update):
         return
 
@@ -171,7 +171,7 @@ Te deben {total_a_cobrar[0] or 0}€
 {mensaje_categorias}""",  parse_mode='Markdown')
     
 async def handler_crear_grupo(update, context):
-    """Crea el grupo en el bot"""
+    """Crea un grupo en la base de datos y añade al creador como administrador de este. Genera un código de invitación y comprueba que sea único"""
     if not await verificar_usuario(update):
         return
     
@@ -197,7 +197,7 @@ async def handler_crear_grupo(update, context):
     await update.message.reply_text(f"El código para el grupo {grupo[1]} es {codigo}")
 
 async def handler_unirse (update, context):
-    """Añade a un usuario a un grupo"""
+    """Añade a un usuario a un grupo mediante el código de invitación. Comprueba si este usuario ya se había unido antes y manda un mensaje diferente si es así"""
     if not await verificar_usuario(update):
         return
     if len(context.args) < 1:
