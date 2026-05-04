@@ -22,6 +22,7 @@ def main():
     app.add_handler(CommandHandler("unirse", handlers.handler_unirse))
     app.add_handler(CommandHandler("misgrupos", handlers.misgrupos))
     app.add_handler(CommandHandler("reiniciar", handlers.reiniciar))
+    app.add_handler(CommandHandler("eliminar_grupo", handlers.eliminar))
     
     app.run_polling()
 
