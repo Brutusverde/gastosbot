@@ -1,5 +1,9 @@
 # 💸 PartyCash
 
+![Python](https://img.shields.io/badge/Python-3.12-blue)
+![Fly.io](https://img.shields.io/badge/Deployed%20on-Fly.io-purple)
+![License](https://img.shields.io/badge/License-MIT-green)
+
 Bot de Telegram para gestionar gastos compartidos en un piso. Permite registrar gastos, calcular deudas automáticamente entre compañeros y obtener resúmenes mensuales por categoría.
 
 ## 🤖 Pruébalo
