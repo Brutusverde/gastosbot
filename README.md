@@ -1,4 +1,4 @@
-# 🏠 GastosBot
+# 💸 PartyCash
 
 Bot de Telegram para gestionar gastos compartidos en un piso. Permite registrar gastos, calcular deudas automáticamente entre compañeros y obtener resúmenes mensuales por categoría.
 
@@ -8,7 +8,20 @@ Busca **@gastospiso_bot** en Telegram y escribe `/start` para probarlo.
 
 ---
 
-## ✨ Comandos
+## ✨ Características
+
+- Registro automático de usuarios al usar cualquier comando
+- Sistema de grupos con código de invitación
+- Cálculo automático de deudas al registrar un gasto, dividido entre los miembros del grupo
+- Resumen mensual con total gastado, deudas pendientes y desglose por categoría
+- Historial de los últimos 10 gastos del grupo
+- Comandos de administración para el creador del grupo
+- Logging estructurado con registro persistente en producción
+- Desplegado en producción con almacenamiento persistente en Fly.io
+
+---
+
+## 🛠️ Comandos
 
 | Comando | Descripción |
 |---|---|
@@ -19,25 +32,22 @@ Busca **@gastospiso_bot** en Telegram y escribe `/start` para probarlo.
 | `/saldar [@usuario]` | Saldar una deuda con un compañero |
 | `/historial` | Ver los últimos 10 gastos del grupo |
 | `/resumen` | Ver tu resumen del mes |
+| `/crear_grupo [nombre]` | Crear un nuevo grupo |
+| `/unirse [código]` | Unirse a un grupo con un código |
+| `/misgrupos` | Ver los grupos a los que perteneces |
+| `/reiniciar` | Reiniciar gastos y deudas del grupo (solo admin) |
+| `/eliminar_grupo` | Eliminar el grupo (solo admin) |
 
 ---
 
-## 💡 Características
-
-- Registro automático de usuarios al hacer `/start`
-- Requiere username de Telegram para garantizar la identificación de cada usuario
-- Cálculo automático de deudas al registrar un gasto, dividido entre todos los miembros del grupo
-- Resumen mensual con total gastado, deudas pendientes y desglose por categoría
-- Historial de los últimos 10 gastos del grupo
-
----
-
-## 🛠️ Tecnologías
+## 🔧 Tecnologías
 
 - Python 3.12
 - python-telegram-bot 20.3
 - SQLite
 - Pandas
+- python-dotenv
+- Desplegado en Fly.io con volumen persistente
 
 ---
 
@@ -48,7 +58,7 @@ gastosbot/
 ├── bot.py              # Punto de entrada, inicializa y arranca el bot
 ├── database.py         # Funciones de acceso a la base de datos SQLite
 ├── handlers.py         # Handlers de cada comando de Telegram
-├── calculadora.py      # Lógica de cálculo y reparto de deudas
+├── logica.py           # Lógica de negocio y cálculo de deudas
 ├── requirements.txt    # Dependencias del proyecto
 ├── Dockerfile          # Configuración para despliegue con Docker
 ├── fly.toml            # Configuración de despliegue en Fly.io
@@ -90,14 +100,17 @@ python bot.py
 - Cálculo automático de deudas
 - Historial de gastos
 - Resumen mensual
+- Sistema de grupos con código de invitación
+- Comandos de administración (reiniciar, eliminar grupo)
+- Mejoras visuales con Markdown y emojis
+- Logging estructurado con registro persistente
 - Despliegue en Fly.io con volumen persistente
 
-### 🚧 En desarrollo
-- Sistema de grupos con código de invitación
-
 ### 📋 Planificado
+- Soporte en chat privado
 - Mejoras en gastos (editar, eliminar, splits personalizados)
 - Recordatorios automáticos de deudas
 - Lista de la compra compartida
 - Tareas del hogar
 - Exportar resumen en PDF
+- Tests con pytest
