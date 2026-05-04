@@ -1,4 +1,4 @@
-from database import obtener_gastos, obtener_deudas, registrar_usuario, registrar_gasto, saldar_deuda, obtener_deudas_usuario, obtener_id_por_username, obtener_usuario_en_grupo
+from database import obtener_gastos, obtener_deudas, registrar_usuario, registrar_gasto, saldar_deuda, obtener_deudas_usuario, obtener_id_por_username, obtener_usuario_en_grupo, obtener_grupos_usuario
 from database import obtener_total_gastado, obtener_total_deuda, obtener_total_a_cobrar, obtener_gastos_por_categoria, crear_grupo, añadir_usuario_grupo, obtener_grupo, obtener_grupo_por_codigo
 from logica import calcular_deudas, crear_codigo
 
@@ -235,3 +235,23 @@ async def handler_unirse (update, context):
 
     añadir_usuario_grupo(id,grupo_unirse[0], 0)
     await update.message.reply_text(f"✅ *{update.message.from_user.first_name}* se ha unido al grupo *{grupo_unirse[1]}*", parse_mode='Markdown')
+
+
+async def misgrupos(update, context):
+    """Muestra los grupos a los que pertenece un usuario y si es admin de alguno"""
+    if not await verificar_usuario(update):
+        return
+    
+    grupos = obtener_grupos_usuario(update.message.from_user.id)
+    mensaje = "Grupos en los que participas:\n"
+
+    if len(grupos) == 0:
+        await update.message.reply_text("⚠️ No perteneces a ningun grupo")
+    else:
+        mensaje = "👥 *Grupos en los que participas:*\n\n"
+        for elemento in grupos:
+            if elemento[2] == True:
+                mensaje += f"• *{elemento[1]}* - *Eres admin*\n"
+            else:
+                mensaje += f"• *{elemento[1]}* - *No eres admin*\n"
+        await update.message.reply_text(mensaje, parse_mode='Markdown')

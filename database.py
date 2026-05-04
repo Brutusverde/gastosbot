@@ -267,7 +267,6 @@ def obtener_grupo_por_codigo(codigo):
 
         codigo_grupo = cursor.fetchone()
         return codigo_grupo
-    
 
 def obtener_usuario_en_grupo(user_id, group_id):
     """Devuelve todos datos que relacionan a un usuario con el grupo al que pertenece"""
@@ -281,3 +280,17 @@ def obtener_usuario_en_grupo(user_id, group_id):
 
         usuario_grupo = cursor.fetchone()
         return usuario_grupo
+    
+def obtener_grupos_usuario(user_id):
+    """Devuelve todos los grupos a los que pertenece un usuario y si es administrador de alguno"""
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT user_groups.group_id, grupos.nombre, user_groups.es_admin
+            FROM user_groups
+            JOIN grupos ON grupos.id = user_groups.group_id 
+            WHERE user_id = ?
+        ''', (user_id,))
+
+        grupos_usuario = cursor.fetchall()
+        return grupos_usuario
