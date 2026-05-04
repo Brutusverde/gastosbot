@@ -1,5 +1,6 @@
 from database import obtener_gastos, obtener_deudas, registrar_usuario, registrar_gasto, saldar_deuda, obtener_deudas_usuario, obtener_id_por_username, obtener_usuario_en_grupo, obtener_grupos_usuario
 from database import obtener_total_gastado, obtener_total_deuda, obtener_total_a_cobrar, obtener_gastos_por_categoria, crear_grupo, añadir_usuario_grupo, obtener_grupo, obtener_grupo_por_codigo
+from database import usuario_es_admin, reiniciar_grupo
 from logica import calcular_deudas, crear_codigo
 
 
@@ -255,3 +256,24 @@ async def misgrupos(update, context):
             else:
                 mensaje += f"• *{elemento[1]}* - *No eres admin*\n"
         await update.message.reply_text(mensaje, parse_mode='Markdown')
+
+async def reiniciar(update, context):
+    """Borra los gastos y deudas de un grupo si el usuario es administrador"""
+    if not await verificar_usuario(update):
+        return
+    
+    id = update.message.from_user.id
+    chat_id = update.message.chat_id
+    grupo = obtener_grupo(chat_id)
+    if grupo is None:
+        await update.message.reply_text("⚠️ No estás en un grupo")
+        return
+    
+    comprobar_admin = usuario_es_admin(id, grupo[0])
+
+    if comprobar_admin == (1,):
+        reiniciar_grupo(grupo[0])
+        await update.message.reply_text("✅ Se han eliminado todos los gastos / deudas del grupo")
+    else:
+        await update.message.reply_text("⚠️ No eres administrador del grupo")
+    

@@ -294,3 +294,24 @@ def obtener_grupos_usuario(user_id):
 
         grupos_usuario = cursor.fetchall()
         return grupos_usuario
+    
+def usuario_es_admin(user_id, group_id):
+    """Comprueba si el usuario es administrador de un grupo"""
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT es_admin
+            FROM user_groups
+            WHERE user_id = ? AND group_id = ?
+        ''', (user_id, group_id))
+
+        es_admin = cursor.fetchone()
+        return es_admin
+
+def reiniciar_grupo(group_id):
+    """Borra los gastos y deudas de un grupo si el usuario es administrador"""
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM gastos WHERE pagador_id IN (SELECT user_id FROM user_groups WHERE group_id = ?)', (group_id,))
+        cursor.execute('DELETE FROM deudas WHERE deudor_id IN (SELECT user_id FROM user_groups WHERE group_id = ?)', (group_id,))
+        conn.commit()
