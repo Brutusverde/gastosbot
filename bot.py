@@ -7,7 +7,11 @@ import logging
 
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s',
-    level=logging.INFO
+    level=logging.INFO,
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('/data/gastosbot.log')
+    ]
 )
 logger = logging.getLogger(__name__)
 
