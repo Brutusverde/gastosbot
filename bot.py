@@ -3,6 +3,13 @@ from database import inicializar_db
 import handlers
 from dotenv import load_dotenv
 import os
+import logging
+
+logging.basicConfig(
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 TOKEN = os.getenv("TOKEN")

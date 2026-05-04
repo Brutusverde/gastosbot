@@ -3,6 +3,9 @@ from database import obtener_total_gastado, obtener_total_deuda, obtener_total_a
 from database import usuario_es_admin, reiniciar_grupo, eliminar_grupo
 from logica import calcular_deudas, crear_codigo
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 async def start(update, context):
     """Registra a un usuario en la base de datos. Devuelve un mensaje distinto si el usuario ya existía en la base de datos con anterioridad"""
@@ -46,8 +49,11 @@ async def gasto(update, context):
 
     if len(gasto_usuario) == 2:
         registrar_gasto(id, float(gasto_usuario[0]), gasto_usuario[1])
+        
     else:
         registrar_gasto(id, float(gasto_usuario[0]), gasto_usuario[1], gasto_usuario[2])
+
+    logger.info(f"Usuario {update.message.from_user.username} ha registrado un gasto de {gasto_usuario[0]}€ en {gasto_usuario[1]}")
 
     calcular_deudas(id, float(gasto_usuario[0]), group_id[0])
 
@@ -159,6 +165,7 @@ async def saldar(update, context):
         return
 
     await update.message.reply_text(f"✅ *{update.message.from_user.first_name}* ha saldado su deuda con *{usuario}*", parse_mode='Markdown')
+    logger.info(f"Usuario {update.message.from_user.username} ha saldado su deuda con {usuario}")
 
 
 async def resumen(update, context):
@@ -211,6 +218,7 @@ async def handler_crear_grupo(update, context):
 
     añadir_usuario_grupo(user_id, grupo[0], 1)
     await update.message.reply_text(f"✅ Grupo *{grupo[1]}* creado correctamente\n\n🔑 Código de invitación: `{codigo}`", parse_mode='Markdown')
+    logger.info(f"Usuario {update.message.from_user.username} ha creado un grupo {grupo[0]} con código de invitación {codigo}")
 
 async def handler_unirse (update, context):
     """Añade a un usuario a un grupo mediante el código de invitación. Comprueba si este usuario ya se había unido antes y manda un mensaje diferente si es así"""
@@ -236,6 +244,7 @@ async def handler_unirse (update, context):
 
     añadir_usuario_grupo(id,grupo_unirse[0], 0)
     await update.message.reply_text(f"✅ *{update.message.from_user.first_name}* se ha unido al grupo *{grupo_unirse[1]}*", parse_mode='Markdown')
+    logger.info(f"Usuario {update.message.from_user.username} se ha unido al grupo {grupo_unirse[0]}")
 
 
 async def misgrupos(update, context):
@@ -274,6 +283,7 @@ async def reiniciar(update, context):
     if comprobar_admin == (1,):
         reiniciar_grupo(grupo[0])
         await update.message.reply_text("✅ Se han eliminado todos los gastos / deudas del grupo")
+        logger.info(f"Usuario {update.message.from_user.username} ha reiniciado el grupo {grupo[0]}")
     else:
         await update.message.reply_text("⚠️ No eres administrador del grupo")
 
@@ -295,6 +305,7 @@ async def eliminar(update, context):
     if comprobar_admin == (1,):
         eliminar_grupo(grupo[0])
         await update.message.reply_text("✅ Se ha eliminado el grupo")
+        logger.info(f"Usuario {update.message.from_user.username} ha eliminado el grupo {grupo[0]}")
     else:
         await update.message.reply_text("⚠️ No eres administrador del grupo")
     
