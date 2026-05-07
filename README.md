@@ -21,6 +21,7 @@ Busca **@gastospiso_bot** en Telegram y escribe `/start` para probarlo.
 - Historial de los últimos 10 gastos del grupo
 - Comandos de administración para el creador del grupo
 - Logging estructurado con registro persistente en producción
+- Soporte en chat privado con selector de grupo por botones inline
 - Desplegado en producción con almacenamiento persistente en Fly.io
 
 ---
@@ -58,11 +59,14 @@ Busca **@gastospiso_bot** en Telegram y escribe `/start` para probarlo.
 ## 📁 Estructura del proyecto
 
 ```
-gastosbot/
+PartyCash/
 ├── bot.py              # Punto de entrada, inicializa y arranca el bot
 ├── database.py         # Funciones de acceso a la base de datos SQLite
 ├── handlers.py         # Handlers de cada comando de Telegram
 ├── logica.py           # Lógica de negocio y cálculo de deudas
+├── conftest.py         # Fixtures compartidas para los tests
+├── test_logica.py      # Tests para logica.py
+├── test_database.py    # Tests para database.py
 ├── requirements.txt    # Dependencias del proyecto
 ├── Dockerfile          # Configuración para despliegue con Docker
 ├── fly.toml            # Configuración de despliegue en Fly.io
@@ -105,16 +109,16 @@ python bot.py
 - Historial de gastos
 - Resumen mensual
 - Sistema de grupos con código de invitación
+- Soporte en chat privado con selector de grupo por botones inline
 - Comandos de administración (reiniciar, eliminar grupo)
 - Mejoras visuales con Markdown y emojis
 - Logging estructurado con registro persistente
 - Despliegue en Fly.io con volumen persistente
+- Tests con pytest
 
 ### 📋 Planificado
-- Soporte en chat privado
 - Mejoras en gastos (editar, eliminar, splits personalizados)
 - Recordatorios automáticos de deudas
 - Lista de la compra compartida
 - Tareas del hogar
 - Exportar resumen en PDF
-- Tests con pytest
