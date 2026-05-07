@@ -2,6 +2,8 @@ from database import obtener_gastos, obtener_deudas, registrar_usuario, registra
 from database import obtener_total_gastado, obtener_total_deuda, obtener_total_a_cobrar, obtener_gastos_por_categoria, crear_grupo, añadir_usuario_grupo, obtener_grupo, obtener_grupo_por_codigo
 from database import usuario_es_admin, reiniciar_grupo, eliminar_grupo
 from logica import calcular_deudas, crear_codigo
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+
 
 import logging
 logger = logging.getLogger(__name__)
@@ -28,7 +30,7 @@ async def verificar_usuario(update):
         registrar_usuario(update.message.from_user.id, update.message.from_user.first_name, update.message.from_user.username)
         return True
 
-async def gasto(update, context):
+async def gasto(update, context, group_id = None):
     """Recoje un gasto y crea las correspondientes deudas. Controla que el usuario pertenezca a un grupo y valida que se han proporcionado los argumentos necesarios"""
 
     if not await verificar_usuario(update):
@@ -36,16 +38,20 @@ async def gasto(update, context):
 
     gasto_usuario = context.args
     id = update.message.from_user.id
-    chat_id = update.message.chat_id
-    group_id =  obtener_grupo(chat_id)
+
+    if group_id is None: 
+        chat_id = update.message.chat_id
+
+        grupo = obtener_grupo(chat_id)
+        if grupo is None:
+            await mostrar_selector_grupo(update, context, "gasto")
+            return
+        group_id = grupo[0]
 
     if len(gasto_usuario) < 2:
         await update.message.reply_text("⚠️ Uso correcto: /gasto [cantidad] [descripción] [categoría opcional]")
         return
     
-    if group_id is None:
-        await update.message.reply_text("⚠️ No perteneces a ningún grupo. Usa /crear_grupo o /unirse.")
-        return
 
     if len(gasto_usuario) == 2:
         registrar_gasto(id, float(gasto_usuario[0]), gasto_usuario[1])
@@ -55,23 +61,26 @@ async def gasto(update, context):
 
     logger.info(f"Usuario {update.message.from_user.username} ha registrado un gasto de {gasto_usuario[0]}€ en {gasto_usuario[1]}")
 
-    calcular_deudas(id, float(gasto_usuario[0]), group_id[0])
+    calcular_deudas(id, float(gasto_usuario[0]), group_id)
 
     await update.message.reply_text(f"✅ Gasto de *{gasto_usuario[0]}€* en *{gasto_usuario[1]}* registrado correctamente", parse_mode='Markdown')
 
-async def deudas(update, context):
+async def deudas(update, context, group_id = None):
     """Muestra todas las deudas del grupo que no han sido saldadas. Controla que el usuario pertenezca a un grupo"""
     if not await verificar_usuario(update):
         return
     
-    chat_id = update.message.chat_id
-    group_id =  obtener_grupo(chat_id)
+    if group_id is None: 
+        chat_id = update.message.chat_id
 
-    if group_id is None:
-        await update.message.reply_text("⚠️ No perteneces a ningún grupo. Usa /crear_grupo o /unirse.")
-        return
+        grupo = obtener_grupo(chat_id)
+        if grupo is None:
+            await mostrar_selector_grupo(update, context, "deudas")
+            return
+        group_id = grupo[0]
 
-    deudas = obtener_deudas(group_id[0])
+
+    deudas = obtener_deudas(group_id)
     mensaje = "Las deudas del grupo son:\n"
 
     if len(deudas) == 0:
@@ -83,19 +92,21 @@ async def deudas(update, context):
             mensaje += f"👤 *{elemento[2]}* le debe *{elemento[5]}€* a *{elemento[4]}*\n"
         await update.message.reply_text(mensaje, parse_mode='Markdown')
 
-async def misdeudas(update, context):
+async def misdeudas(update, context, group_id = None):
     """Muestra las deudas no pagadas de un usuario perteneciente a un grupo. Controla que el usuario pertenezca a un grupo"""
     if not await verificar_usuario(update):
         return
-
-    chat_id = update.message.chat_id
-    group_id =  obtener_grupo(chat_id)
-
-    if group_id is None:
-        await update.message.reply_text("⚠️ No perteneces a ningún grupo. Usa /crear_grupo o /unirse.")
-        return
     
-    misdeudas = obtener_deudas_usuario(update.message.from_user.id, group_id[0])
+    if group_id is None: 
+        chat_id = update.message.chat_id
+
+        grupo = obtener_grupo(chat_id)
+        if grupo is None:
+            await mostrar_selector_grupo(update, context, "misdeudas")
+            return
+        group_id = grupo[0]
+    
+    misdeudas = obtener_deudas_usuario(update.message.from_user.id, group_id)
     mensaje = "Tus deudas son:\n"
 
     if len(misdeudas) == 0:
@@ -106,19 +117,21 @@ async def misdeudas(update, context):
             mensaje += f"• Le debes *{elemento[5]}€* a *{elemento[4]}*\n"
         await update.message.reply_text(mensaje, parse_mode='Markdown')
 
-async def historial(update, context):
+async def historial(update, context, group_id = None):
     """Muestra un historial de los últimos gastos del grupo. Controla que el usuario pertenezca a un grupo"""
     if not await verificar_usuario(update):
         return
     
-    chat_id = update.message.chat_id
-    group_id =  obtener_grupo(chat_id)
+    if group_id is None: 
+        chat_id = update.message.chat_id
 
-    if group_id is None:
-        await update.message.reply_text("⚠️ No perteneces a ningún grupo. Usa /crear_grupo o /unirse.")
-        return
+        grupo = obtener_grupo(chat_id)
+        if grupo is None:
+            await mostrar_selector_grupo(update, context, "historial")
+            return
+        group_id = grupo[0]
     
-    gastos = obtener_gastos(group_id[0])
+    gastos = obtener_gastos(group_id)
     mensaje = "Los últimos gastos son:\n"
 
     if len(gastos) == 0:
@@ -130,7 +143,7 @@ async def historial(update, context):
         await update.message.reply_text(mensaje, parse_mode='Markdown')
 
 
-async def saldar(update, context):
+async def saldar(update, context, group_id = None):
     """Salda una deuda utilizando el nombre de usuario de telegram del deudor. Controla que el usuario pertenezca a un grupo"""
     if not await verificar_usuario(update):
         return
@@ -139,16 +152,18 @@ async def saldar(update, context):
         await update.message.reply_text("⚠️ Uso correcto: /saldar [@usuario]")
         return
     
-    chat_id = update.message.chat_id
-    group_id =  obtener_grupo(chat_id)
+    if group_id is None: 
+        chat_id = update.message.chat_id
 
-    if group_id is None:
-        await update.message.reply_text("⚠️ No perteneces a ningún grupo. Usa /crear_grupo o /unirse.")
-        return
+        grupo = obtener_grupo(chat_id)
+        if grupo is None:
+            await mostrar_selector_grupo(update, context, "saldar")
+            return
+        group_id = grupo[0]
     
     usuario = context.args[0]
     acreedor_id = obtener_id_por_username(usuario)
-    comprobacion_deuda = obtener_deudas_usuario(update.message.from_user.id, group_id[0])
+    comprobacion_deuda = obtener_deudas_usuario(update.message.from_user.id, group_id)
 
     if not comprobacion_deuda:
         await update.message.reply_text("⚠️ No tienes deudas pendientes que saldar.")
@@ -266,46 +281,94 @@ async def misgrupos(update, context):
                 mensaje += f"• *{elemento[1]}* - *No eres admin*\n"
         await update.message.reply_text(mensaje, parse_mode='Markdown')
 
-async def reiniciar(update, context):
+async def reiniciar(update, context, group_id = None):
     """Borra los gastos y deudas de un grupo si el usuario es administrador"""
     if not await verificar_usuario(update):
         return
     
     id = update.message.from_user.id
-    chat_id = update.message.chat_id
-    grupo = obtener_grupo(chat_id)
-    if grupo is None:
-        await update.message.reply_text("⚠️ No estás en un grupo")
-        return
+    if group_id is None: 
+        chat_id = update.message.chat_id
+
+        grupo = obtener_grupo(chat_id)
+        if grupo is None:
+            await mostrar_selector_grupo(update, context, "reiniciar")
+            return
+        group_id = grupo[0]
     
-    comprobar_admin = usuario_es_admin(id, grupo[0])
+    comprobar_admin = usuario_es_admin(id, group_id)
 
     if comprobar_admin == (1,):
-        reiniciar_grupo(grupo[0])
+        reiniciar_grupo(group_id)
         await update.message.reply_text("✅ Se han eliminado todos los gastos / deudas del grupo")
-        logger.info(f"Usuario {update.message.from_user.username} ha reiniciado el grupo {grupo[0]}")
+        logger.info(f"Usuario {update.message.from_user.username} ha reiniciado el grupo {group_id}")
     else:
         await update.message.reply_text("⚠️ No eres administrador del grupo")
 
-async def eliminar(update, context):
+async def eliminar(update, context, group_id = None):
     """Elimina un grupo si el usuario es administrador"""
     if not await verificar_usuario(update):
         return
     
     id = update.message.from_user.id
-    chat_id = update.message.chat_id
-    grupo = obtener_grupo(chat_id)
+    if group_id is None: 
+        chat_id = update.message.chat_id
 
-    if grupo is None:
-        await update.message.reply_text("⚠️ No estás en un grupo")
-        return
+        grupo = obtener_grupo(chat_id)
+        if grupo is None:
+            await mostrar_selector_grupo(update, context, "eliminar")
+            return
+        group_id = grupo[0]
     
-    comprobar_admin = usuario_es_admin(id, grupo[0])
+    comprobar_admin = usuario_es_admin(id, group_id)
 
     if comprobar_admin == (1,):
-        eliminar_grupo(grupo[0])
+        eliminar_grupo(group_id)
         await update.message.reply_text("✅ Se ha eliminado el grupo")
-        logger.info(f"Usuario {update.message.from_user.username} ha eliminado el grupo {grupo[0]}")
+        logger.info(f"Usuario {update.message.from_user.username} ha eliminado el grupo {group_id}")
     else:
         await update.message.reply_text("⚠️ No eres administrador del grupo")
+
+
+async def mostrar_selector_grupo(update, context, comando):
+    """Muestra un selector de grupos al usuario para ejecutar un comando específico. Controla que el usuario pertenezca a algún grupo y muestra un mensaje distinto si no es así"""
+    if not await verificar_usuario(update):
+        return
     
+    id = update.message.from_user.id
+    grupos = obtener_grupos_usuario(id)
+
+    if len(grupos) == 0:
+        await update.message.reply_text("⚠️ No perteneces a ningun grupo")
+        return
+    
+    botones = []
+    for grupo in grupos:
+        botones.append([InlineKeyboardButton(grupo[1], callback_data=f"{comando}:{grupo[0]}")])
+
+    teclado = InlineKeyboardMarkup(botones)
+    await update.message.reply_text("¿En qué grupo quieres ejecutar este comando?", reply_markup=teclado)
+
+
+def es_chat_privado(chat_id):
+    """Devuelve si un chat es privado o si es un grupo"""
+    return obtener_grupo(chat_id) is None
+
+comandos = {
+    "deudas": deudas,
+    "misdeudas": misdeudas,
+    "historial": historial,
+    "gasto": gasto,
+    "saldar": saldar,
+    "reiniciar": reiniciar,
+    "eliminar": eliminar
+}
+
+async def procesar_seleccion_grupo(update, context):
+    await update.callback_query.answer()
+    data = update.callback_query.data
+    comando, group_id = data.split(":")
+
+    await comandos[comando](update, context, int(group_id))
+
+

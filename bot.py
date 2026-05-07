@@ -4,6 +4,7 @@ import handlers
 from dotenv import load_dotenv
 import os
 import logging
+from telegram.ext import CallbackQueryHandler
 
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -21,6 +22,7 @@ TOKEN = os.getenv("TOKEN")
 def main():
     inicializar_db()
     app = ApplicationBuilder().token(TOKEN).build()
+    app.add_handler(CallbackQueryHandler(handlers.procesar_seleccion_grupo))
     
     app.add_handler(CommandHandler("start", handlers.start))
     app.add_handler(CommandHandler("gasto", handlers.gasto))
