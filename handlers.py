@@ -23,6 +23,9 @@ async def start(update, context):
 
 async def verificar_usuario(update):
     """Registra un usuario en la base de datos de forma silenciosa. Solo devuelve un mensaje si la creación ha fallado"""
+    if update.effective_message.from_user.is_bot:
+        return True
+    
     if update.effective_message.from_user.username is None:
         await update.effective_message.reply_text("⚠️ Necesitas un nombre de usuario de Telegram (@username) para usar el bot.")
         return False
