@@ -109,7 +109,7 @@ async def misdeudas(update, context, group_id = None):
 
         grupo = obtener_grupo(chat_id)
         if es_chat_privado(update):
-            await mostrar_selector_grupo(update, context, "deudas")
+            await mostrar_selector_grupo(update, context, "misdeudas")
             return
         group_id = grupo[0]
     
@@ -134,7 +134,7 @@ async def historial(update, context, group_id = None):
 
         grupo = obtener_grupo(chat_id)
         if es_chat_privado(update):
-            await mostrar_selector_grupo(update, context, "deudas")
+            await mostrar_selector_grupo(update, context, "historial")
             return
         group_id = grupo[0]
     
@@ -164,7 +164,7 @@ async def saldar(update, context, group_id = None):
 
         grupo = obtener_grupo(chat_id)
         if es_chat_privado(update):
-            await mostrar_selector_grupo(update, context, "deudas")
+            await mostrar_selector_grupo(update, context, "saldar")
             return
         group_id = grupo[0]
     
@@ -299,7 +299,7 @@ async def reiniciar(update, context, group_id = None):
 
         grupo = obtener_grupo(chat_id)
         if es_chat_privado(update):
-            await mostrar_selector_grupo(update, context, "deudas")
+            await mostrar_selector_grupo(update, context, "reiniciar")
             return
         group_id = grupo[0]
     
@@ -323,7 +323,7 @@ async def eliminar(update, context, group_id = None):
 
         grupo = obtener_grupo(chat_id)
         if es_chat_privado(update):
-            await mostrar_selector_grupo(update, context, "deudas")
+            await mostrar_selector_grupo(update, context, "eliminar")
             return
         group_id = grupo[0]
     
