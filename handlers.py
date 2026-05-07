@@ -14,13 +14,13 @@ async def start(update, context):
     if update.effective_message.from_user.is_bot:
         return True
     
-    if update.effective_message.from_user.username is None:
+    if update.effective_user.username is None:
         await update.effective_message.reply_text("⚠️ Necesitas un nombre de usuario de Telegram (@username) para usar el bot.")
         return
 
-    registro_usuario = registrar_usuario(update.effective_message.from_user.id, update.effective_message.from_user.first_name, update.effective_message.from_user.username)
+    registro_usuario = registrar_usuario(update.effective_user.id, update.effective_user.first_name, update.effective_user.username)
     if registro_usuario == 0:
-        await update.effective_message.reply_text(f"¡Bienvenido de nuevo, {update.effective_message.from_user.first_name}!")
+        await update.effective_message.reply_text(f"¡Bienvenido de nuevo, {update.effective_user.first_name}!")
     else:
         await update.effective_message.reply_text("Bienvenido! Tu usuario ha sido registrado")
 
@@ -29,11 +29,11 @@ async def verificar_usuario(update):
     if update.effective_message.from_user.is_bot:
         return True
     
-    if update.effective_message.from_user.username is None:
+    if update.effective_user.username is None:
         await update.effective_message.reply_text("⚠️ Necesitas un nombre de usuario de Telegram (@username) para usar el bot.")
         return False
     else:
-        registrar_usuario(update.effective_message.from_user.id, update.effective_message.from_user.first_name, update.effective_message.from_user.username)
+        registrar_usuario(update.effective_user.id, update.effective_user.first_name, update.effective_user.username)
         return True
 
 async def gasto(update, context, group_id = None):
@@ -43,7 +43,7 @@ async def gasto(update, context, group_id = None):
         return
 
     gasto_usuario = context.args
-    id = update.effective_message.from_user.id
+    id = update.effective_user.id
 
     if group_id is None: 
 
@@ -66,7 +66,7 @@ async def gasto(update, context, group_id = None):
     else:
         registrar_gasto(id, float(gasto_usuario[0]), gasto_usuario[1], gasto_usuario[2])
 
-    logger.info(f"Usuario {update.effective_message.from_user.username} ha registrado un gasto de {gasto_usuario[0]}€ en {gasto_usuario[1]}")
+    logger.info(f"Usuario {update.effective_user.username} ha registrado un gasto de {gasto_usuario[0]}€ en {gasto_usuario[1]}")
 
     calcular_deudas(id, float(gasto_usuario[0]), group_id)
 
@@ -113,7 +113,7 @@ async def misdeudas(update, context, group_id = None):
             return
         group_id = grupo[0]
     
-    misdeudas = obtener_deudas_usuario(update.effective_message.from_user.id, group_id)
+    misdeudas = obtener_deudas_usuario(update.effective_user.id, group_id)
     mensaje = "Tus deudas son:\n"
 
     if len(misdeudas) == 0:
@@ -170,7 +170,7 @@ async def saldar(update, context, group_id = None):
     
     usuario = context.args[0]
     acreedor_id = obtener_id_por_username(usuario)
-    comprobacion_deuda = obtener_deudas_usuario(update.effective_message.from_user.id, group_id)
+    comprobacion_deuda = obtener_deudas_usuario(update.effective_user.id, group_id)
 
     if not comprobacion_deuda:
         await update.effective_message.reply_text("⚠️ No tienes deudas pendientes que saldar.")
@@ -180,14 +180,14 @@ async def saldar(update, context, group_id = None):
         await update.effective_message.reply_text("⚠️ No encontré ese usuario. Asegúrate de que esté registrado en el bot.")
         return
     
-    comprobacion_deuda_correcta = saldar_deuda(update.effective_message.from_user.id, acreedor_id[0])
+    comprobacion_deuda_correcta = saldar_deuda(update.effective_user.id, acreedor_id[0])
     
     if not comprobacion_deuda_correcta:
         await update.effective_message.reply_text("No se ha encontrado la deuda que quieres saldar")
         return
 
-    await update.effective_message.reply_text(f"✅ *{update.effective_message.from_user.first_name}* ha saldado su deuda con *{usuario}*", parse_mode='Markdown')
-    logger.info(f"Usuario {update.effective_message.from_user.username} ha saldado su deuda con {usuario}")
+    await update.effective_message.reply_text(f"✅ *{update.effective_user.first_name}* ha saldado su deuda con *{usuario}*", parse_mode='Markdown')
+    logger.info(f"Usuario {update.effective_user.username} ha saldado su deuda con {usuario}")
 
 
 async def resumen(update, context):
@@ -195,7 +195,7 @@ async def resumen(update, context):
     if not await verificar_usuario(update):
         return
 
-    id = update.effective_message.from_user.id
+    id = update.effective_user.id
     mensaje_categorias = ""
 
     gasto_total = obtener_total_gastado(id)
@@ -207,7 +207,7 @@ async def resumen(update, context):
         mensaje_categorias += f"• *{gasto[1]}*: {gasto[0]}€\n"
 
     await update.effective_message.reply_text(
-    f"📊 *Resumen de {update.effective_message.from_user.first_name}*\n\n"
+    f"📊 *Resumen de {update.effective_user.first_name}*\n\n"
     f"💰 Total gastado este mes: *{gasto_total[0] or 0}€*\n"
     f"📉 Total deudas: *{deuda_total[0] or 0}€*\n"
     f"📈 Te deben: *{total_a_cobrar[0] or 0}€*\n\n"
@@ -226,7 +226,7 @@ async def handler_crear_grupo(update, context):
     
     nombre_grupo = " ".join(context.args)
     
-    user_id = update.effective_message.from_user.id
+    user_id = update.effective_user.id
     chat_id = update.effective_message.chat_id
 
     if obtener_grupo(chat_id) is not None:
@@ -240,7 +240,7 @@ async def handler_crear_grupo(update, context):
 
     añadir_usuario_grupo(user_id, grupo[0], 1)
     await update.effective_message.reply_text(f"✅ Grupo *{grupo[1]}* creado correctamente\n\n🔑 Código de invitación: `{codigo}`", parse_mode='Markdown')
-    logger.info(f"Usuario {update.effective_message.from_user.username} ha creado un grupo {grupo[0]} con código de invitación {codigo}")
+    logger.info(f"Usuario {update.effective_user.username} ha creado un grupo {grupo[0]} con código de invitación {codigo}")
 
 async def handler_unirse (update, context):
     """Añade a un usuario a un grupo mediante el código de invitación. Comprueba si este usuario ya se había unido antes y manda un mensaje diferente si es así"""
@@ -250,7 +250,7 @@ async def handler_unirse (update, context):
         await update.effective_message.reply_text("⚠️ Uso correcto: /unirse [código]")
         return
     
-    id = update.effective_message.from_user.id
+    id = update.effective_user.id
     
     grupo_unirse = obtener_grupo_por_codigo(context.args[0])
 
@@ -265,8 +265,8 @@ async def handler_unirse (update, context):
         return
 
     añadir_usuario_grupo(id,grupo_unirse[0], 0)
-    await update.effective_message.reply_text(f"✅ *{update.effective_message.from_user.first_name}* se ha unido al grupo *{grupo_unirse[1]}*", parse_mode='Markdown')
-    logger.info(f"Usuario {update.effective_message.from_user.username} se ha unido al grupo {grupo_unirse[0]}")
+    await update.effective_message.reply_text(f"✅ *{update.effective_user.first_name}* se ha unido al grupo *{grupo_unirse[1]}*", parse_mode='Markdown')
+    logger.info(f"Usuario {update.effective_user.username} se ha unido al grupo {grupo_unirse[0]}")
 
 
 async def misgrupos(update, context):
@@ -274,7 +274,7 @@ async def misgrupos(update, context):
     if not await verificar_usuario(update):
         return
     
-    grupos = obtener_grupos_usuario(update.effective_message.from_user.id)
+    grupos = obtener_grupos_usuario(update.effective_user.id)
     mensaje = "Grupos en los que participas:\n"
 
     if len(grupos) == 0:
@@ -293,7 +293,7 @@ async def reiniciar(update, context, group_id = None):
     if not await verificar_usuario(update):
         return
     
-    id = update.effective_message.from_user.id
+    id = update.effective_user.id
     if group_id is None: 
         chat_id = update.effective_message.chat_id
 
@@ -308,7 +308,7 @@ async def reiniciar(update, context, group_id = None):
     if comprobar_admin == (1,):
         reiniciar_grupo(group_id)
         await update.effective_message.reply_text("✅ Se han eliminado todos los gastos / deudas del grupo")
-        logger.info(f"Usuario {update.effective_message.from_user.username} ha reiniciado el grupo {group_id}")
+        logger.info(f"Usuario {update.effective_user.username} ha reiniciado el grupo {group_id}")
     else:
         await update.effective_message.reply_text("⚠️ No eres administrador del grupo")
 
@@ -317,7 +317,7 @@ async def eliminar(update, context, group_id = None):
     if not await verificar_usuario(update):
         return
     
-    id = update.effective_message.from_user.id
+    id = update.effective_user.id
     if group_id is None: 
         chat_id = update.effective_message.chat_id
 
@@ -332,7 +332,7 @@ async def eliminar(update, context, group_id = None):
     if comprobar_admin == (1,):
         eliminar_grupo(group_id)
         await update.effective_message.reply_text("✅ Se ha eliminado el grupo")
-        logger.info(f"Usuario {update.effective_message.from_user.username} ha eliminado el grupo {group_id}")
+        logger.info(f"Usuario {update.effective_user.username} ha eliminado el grupo {group_id}")
     else:
         await update.effective_message.reply_text("⚠️ No eres administrador del grupo")
 
@@ -342,7 +342,7 @@ async def mostrar_selector_grupo(update, context, comando):
     if not await verificar_usuario(update):
         return
     
-    id = update.effective_message.from_user.id
+    id = update.effective_user.id
     grupos = obtener_grupos_usuario(id)
 
     if len(grupos) == 0:
