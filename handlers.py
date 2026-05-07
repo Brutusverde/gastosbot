@@ -40,12 +40,12 @@ async def gasto(update, context, group_id = None):
     id = update.message.from_user.id
 
     if group_id is None: 
-        chat_id = update.message.chat_id
 
-        grupo = obtener_grupo(chat_id)
-        if grupo is None:
+        chat_id = update.message.chat_id
+        if es_chat_privado(update):
             await mostrar_selector_grupo(update, context, "gasto")
             return
+        grupo = obtener_grupo(chat_id)
         group_id = grupo[0]
 
     if len(gasto_usuario) < 2:
@@ -74,7 +74,7 @@ async def deudas(update, context, group_id = None):
         chat_id = update.message.chat_id
 
         grupo = obtener_grupo(chat_id)
-        if grupo is None:
+        if es_chat_privado(update):
             await mostrar_selector_grupo(update, context, "deudas")
             return
         group_id = grupo[0]
@@ -101,8 +101,8 @@ async def misdeudas(update, context, group_id = None):
         chat_id = update.message.chat_id
 
         grupo = obtener_grupo(chat_id)
-        if grupo is None:
-            await mostrar_selector_grupo(update, context, "misdeudas")
+        if es_chat_privado(update):
+            await mostrar_selector_grupo(update, context, "deudas")
             return
         group_id = grupo[0]
     
@@ -126,8 +126,8 @@ async def historial(update, context, group_id = None):
         chat_id = update.message.chat_id
 
         grupo = obtener_grupo(chat_id)
-        if grupo is None:
-            await mostrar_selector_grupo(update, context, "historial")
+        if es_chat_privado(update):
+            await mostrar_selector_grupo(update, context, "deudas")
             return
         group_id = grupo[0]
     
@@ -156,8 +156,8 @@ async def saldar(update, context, group_id = None):
         chat_id = update.message.chat_id
 
         grupo = obtener_grupo(chat_id)
-        if grupo is None:
-            await mostrar_selector_grupo(update, context, "saldar")
+        if es_chat_privado(update):
+            await mostrar_selector_grupo(update, context, "deudas")
             return
         group_id = grupo[0]
     
@@ -291,8 +291,8 @@ async def reiniciar(update, context, group_id = None):
         chat_id = update.message.chat_id
 
         grupo = obtener_grupo(chat_id)
-        if grupo is None:
-            await mostrar_selector_grupo(update, context, "reiniciar")
+        if es_chat_privado(update):
+            await mostrar_selector_grupo(update, context, "deudas")
             return
         group_id = grupo[0]
     
@@ -315,8 +315,8 @@ async def eliminar(update, context, group_id = None):
         chat_id = update.message.chat_id
 
         grupo = obtener_grupo(chat_id)
-        if grupo is None:
-            await mostrar_selector_grupo(update, context, "eliminar")
+        if es_chat_privado(update):
+            await mostrar_selector_grupo(update, context, "deudas")
             return
         group_id = grupo[0]
     
@@ -350,9 +350,8 @@ async def mostrar_selector_grupo(update, context, comando):
     await update.message.reply_text("¿En qué grupo quieres ejecutar este comando?", reply_markup=teclado)
 
 
-def es_chat_privado(chat_id):
-    """Devuelve si un chat es privado o si es un grupo"""
-    return obtener_grupo(chat_id) is None
+def es_chat_privado(update):
+    return update.message.chat.type == "private"
 
 comandos = {
     "deudas": deudas,
