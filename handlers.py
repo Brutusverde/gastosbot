@@ -233,7 +233,7 @@ async def handler_crear_grupo(update, context):
         await update.effective_message.reply_text(f"Error al crear tu grupo. Ya existe un grupo en este chat")
         return
     
-    codigo = crear_codigo()
+    codigo = crear_y_comprobar_codigo
 
     crear_grupo(nombre_grupo, codigo, chat_id)
     grupo = obtener_grupo(chat_id)
@@ -371,6 +371,7 @@ comandos = {
 }
 
 async def procesar_seleccion_grupo(update, context):
+    """Crea los botones para elegir grupo en el chat privado"""
     await update.callback_query.answer()
     data = update.callback_query.data
     comando, group_id = data.split(":")
@@ -378,3 +379,10 @@ async def procesar_seleccion_grupo(update, context):
     await comandos[comando](update, context, int(group_id))
     logger.info(f"Args recuperados: {context.args}")
     logger.info(f"Args en user_data: {context.user_data.get('args_pendientes', [])}")
+
+def crear_y_comprobar_codigo():
+    """Llama a crear codigo y comprueba que sea valido. Si no lo es, vuelve a llamar a crear codigo"""
+    codigo = crear_codigo()
+    while obtener_grupo_por_codigo(codigo) is not None:
+        codigo = crear_codigo()
+    return codigo
