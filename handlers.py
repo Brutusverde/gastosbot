@@ -43,6 +43,7 @@ async def gasto(update, context, group_id = None):
 
         chat_id = update.effective_message.chat_id
         if es_chat_privado(update):
+            context.user_data['args_pendientes'] = gasto_usuario
             await mostrar_selector_grupo(update, context, "gasto")
             return
         grupo = obtener_grupo(chat_id)
@@ -367,7 +368,7 @@ async def procesar_seleccion_grupo(update, context):
     await update.callback_query.answer()
     data = update.callback_query.data
     comando, group_id = data.split(":")
-
+    context.args = context.user_data.get('args_pendientes', [])
     await comandos[comando](update, context, int(group_id))
 
 
