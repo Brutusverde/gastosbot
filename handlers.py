@@ -376,6 +376,8 @@ async def procesar_seleccion_grupo(update, context):
     comando, group_id = data.split(":")
     context.args = context.user_data.get('args_pendientes', [])
     await comandos[comando](update, context, int(group_id))
+    logger.info(f"Args recuperados: {context.args}")
+    logger.info(f"Args en user_data: {context.user_data.get('args_pendientes', [])}")
 
 async def limpiar_bot(update, context):
     """Handler temporal para eliminar el usuario bot de la BD"""
