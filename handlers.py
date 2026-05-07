@@ -1,6 +1,6 @@
 from database import obtener_gastos, obtener_deudas, registrar_usuario, registrar_gasto, saldar_deuda, obtener_deudas_usuario, obtener_id_por_username, obtener_usuario_en_grupo, obtener_grupos_usuario
 from database import obtener_total_gastado, obtener_total_deuda, obtener_total_a_cobrar, obtener_gastos_por_categoria, crear_grupo, añadir_usuario_grupo, obtener_grupo, obtener_grupo_por_codigo
-from database import usuario_es_admin, reiniciar_grupo, eliminar_grupo
+from database import usuario_es_admin, reiniciar_grupo, eliminar_grupo, eliminar_usuario
 from logica import calcular_deudas, crear_codigo
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -11,6 +11,9 @@ logger = logging.getLogger(__name__)
 
 async def start(update, context):
     """Registra a un usuario en la base de datos. Devuelve un mensaje distinto si el usuario ya existía en la base de datos con anterioridad"""
+    if update.effective_message.from_user.is_bot:
+        return True
+    
     if update.effective_message.from_user.username is None:
         await update.effective_message.reply_text("⚠️ Necesitas un nombre de usuario de Telegram (@username) para usar el bot.")
         return
@@ -373,5 +376,10 @@ async def procesar_seleccion_grupo(update, context):
     comando, group_id = data.split(":")
     context.args = context.user_data.get('args_pendientes', [])
     await comandos[comando](update, context, int(group_id))
+
+async def limpiar_bot(update, context):
+    """Handler temporal para eliminar el usuario bot de la BD"""
+    eliminar_usuario("PartyCashBot")
+    await update.effective_message.reply_text("✅ Usuario bot eliminado")
 
 

@@ -325,3 +325,9 @@ def eliminar_grupo(group_id):
         cursor.execute('DELETE FROM user_groups  WHERE group_id = ?', (group_id,))
         cursor.execute('DELETE FROM grupos WHERE id = ?', (group_id,))
         conn.commit()
+
+def eliminar_usuario(username):
+    with sqlite3.connect(DB_NAME) as conn:
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM usuarios WHERE username = ?', (username,))
+        conn.commit()

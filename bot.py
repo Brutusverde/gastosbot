@@ -36,6 +36,7 @@ def main():
     app.add_handler(CommandHandler("misgrupos", handlers.misgrupos))
     app.add_handler(CommandHandler("reiniciar", handlers.reiniciar))
     app.add_handler(CommandHandler("eliminar_grupo", handlers.eliminar))
+    app.add_handler(CommandHandler("limpiar_bot", handlers.limpiar_bot))
     
     app.run_polling()
 
