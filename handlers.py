@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-async def start(update, context)
+async def start(update, context):
     """Registra a un usuario en la base de datos. Devuelve un mensaje distinto si el usuario ya existía en la base de datos con anterioridad"""
     if update.effective_message.from_user.username is None:
         await update.effective_message.reply_text("⚠️ Necesitas un nombre de usuario de Telegram (@username) para usar el bot.")
